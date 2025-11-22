@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI">
+  <meta name="keywords" content="Embodied AI, Visual Navigation, Simulation, 3D Reconstruction, Novel View Synthesis">     
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wanderland</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'><text y='58' font-size='60'>🔮</text></svg>">
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script> -->
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="./static/js/copy2clipboard.js"></script>
+  <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+  
+  <script src="https://cdn.knightlab.com/libs/juxtapose/latest/js/juxtapose.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.knightlab.com/libs/juxtapose/latest/css/juxtapose.css">
+  <script defer src="https://unpkg.com/img-comparison-slider@7/dist/index.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/img-comparison-slider@7/dist/styles.css" />
+</head>
+
+
+<body>
+
+<!-- Shared SVG gradient definition for comparison sliders -->
+<svg style="position: absolute; width: 0; height: 0; visibility: hidden;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="sliderGradient" x1="-8" y1="0" x2="8" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgb(16,185,129)"/>
+      <stop offset="100%" stop-color="rgb(76,29,149)"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- Navigation bar. -->
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="container is-max-desktop">
+
+    <!-- Lab logo. Will stay here even if view from mobile -->
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://ai4ce.github.io/" target="_blank" rel="noopener noreferrer">
+        <img src="./static/images/ai4ce_new_linear_notext.svg" alt="AI4CE Lab" style="height: 2.0rem;">
+      </a>
+      <a role="button" onclick="this.classList.toggle('is-active');document.querySelector('#'+this.dataset.target).classList.toggle('is-active');" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <!-- Will collapse into a "burger" menu on mobile. -->
+    <div id="navbarBasicExample" class="navbar-menu">
+
+      <div class="navbar-start">
+        <a class="navbar-item" href="https://www.nyu.edu/" target="_blank">
+          <img src="./static/images/NYU_Long_RGB_Color.png" alt="NYU Logo" style="height: 2.0rem;">
+        </a>
+      </div>
+      
+
+      <div class="navbar-end">
+        <!-- After accepted, add conference logo here -->
+        <!-- <a class="navbar-item" href="https://cvpr.thecvf.com/Conferences/2024" target="_blank" rel="noopener noreferrer">
+            <img src="img/logo/logo-cvpr.png" alt="CVPR 2024" style="height: 2.0rem;">
+        </a> -->
+
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            More Research
+          </a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://ai4ce.github.io/CityWalker/">
+              CityWalker
+            </a>
+            <a class="navbar-item" href="https://ai4ce.github.io/MSG/">
+              Multiview Scene Graph
+            </a>
+          </div>
+        </div>
+
+      </div>
+      
+    </div>
+
+  </div>
+</nav>
+
+<!-- Title and authors. -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <img src="./static/images/logo.png" alt="Wanderland Icon"
+              style="height: 8em; margin-right: 1em; display: inline-block; vertical-align: middle;">
+            <h1 class="title is-1 publication-title" style="
+              font-size: 4rem;
+              font-family: 'Playfair Display', 'Geogia', serif;
+              background: linear-gradient(90deg, rgb(16,185,129), rgb(76,29,149));
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              color: transparent;
+              margin-bottom: 0; margin-right: 0.5em; display: inline-block; vertical-align: middle;
+              font-variant: small-caps;
+              letter-spacing: 0.02em;
+            ">
+              Wanderland
+            </h1>
+            <span style="font-size: 2rem; font-weight: 200; line-height: 1; display: inline-block; vertical-align: middle;">
+              Geometrically Grounded Simulation <br> for Open-World Embodied AI
+            </span>
+          </div>
+          <br>
+          <!-- <div class="column is-full_width">
+            <h2 class="title is-4"><a href="https://2025.ieee-icra.org">ICRA 2025 (Under Review)</a></h2>
+          </div> -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://gaaaavin.github.io/">Xinhao Liu</a><sup>1,⚖️</sup>,</span>
+            <span class="author-block">
+              <a href="https://songard.github.io/">Jiaqi Li</a><sup>1,⚖️</sup>,</span>
+            <span class="author-block">
+              <a href="https://denghilbert.github.io/">Youming Deng</a><sup>2</sup>,</span>
+            </span>
+            <span class="author-block">
+              <a href="https://www.linkedin.com/in/rue-chen-174a63370/">Ruxin Chen</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="#">Yingjia Zhang</a><sup>1</sup>,
+            </span>
+            <br>
+            <span class="author-block">
+              <a href="#">Yifei Ma</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://cs.shanghai.nyu.edu/faculty/li-guo-guoli">Li Guo</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://yimingli-page.github.io/">Yiming Li</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://jingz6676.github.io">Jing Zhang</a><sup>1,✉️</sup>
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=YeG8ZM0AAAAJ">Chen Feng</a><sup>1,✉️</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup> New York University, </span>
+            <span class="author-block"><sup>2</sup> Cornell University, </span>
+            <br>
+            <span class="author-block">⚖️: Equal contribution, random order </span> <span style="margin-left: 1em;"></span>
+            <span class="author-block">✉️: Corresponding author </span>
+          </div>
+
+
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                 <!-- add here later. -->
+                <a href=""                
+                   class="external-link button is-normal is-rounded"
+                   style="background-color: #b31b1b; color: white; border: none;">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="" class="external-link button is-normal is-rounded is-dark" style="pointer-events: none; opacity: 0.5;">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                  <span>Coming soon</span>
+                </a>
+              </span>
+              <!-- Dataset Link. -->
+              <span class="link-block">
+                <a href="" class="external-link button is-normal is-rounded"
+                  style="pointer-events: none; opacity: 0.5; background-color: #f7e025; color: #191622; border: none;">
+                  <span class="icon">
+                    <!-- huggingface emoji: -->
+                    <span style="font-size: 1.1em; vertical-align: middle;">🤗</span>
+                  </span>
+                  <span>Coming soon</span>
+                </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser. -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width teaser no-margin">
+        
+        <h2 class="title is-3">TL;DR</h2>
+        <p style="font-size: 20px; background-color: #8b00e13b;">
+          Visual realism is insufficient for embodied AI. Trustworthy benchmarking demands the metric-scale <b>geometric grounding</b> that
+          previous pipelines lack.
+        </p>
+        <br>
+        
+        <!-- Toggle buttons -->
+        <center>
+          <button class="btn" id="reconstruction_button" onclick="switchReconstructionMode('reconstruction')">3D Reconstruction / Mesh Extraction</button>
+          <button class="btn" id="sensor_button" onclick="switchReconstructionMode('sensor')">Photorealistic Sensor Simulation</button>
+          <br>
+          <br>
+          
+          <!-- 3D Reconstruction / Mesh Extraction (default) -->
+          <div id="reconstruction_container" style="width: 100%; max-width: 1200px;">
+            <img-comparison-slider class="slider-with-animated-handle">
+              <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                <source src="./static/videos/3drecon_mosaic.webm" type="video/webm">
+                Your browser does not support the video tag.
+              </video>
+              <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                <source src="./static/videos/mesh_mosaic.webm" type="video/webm">
+                Your browser does not support the video tag.
+              </video>
+              <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+              </svg>
+            </img-comparison-slider>
+          </div>
+          
+          <!-- Photorealistic Sensor Simulation -->
+          <div id="sensor_container" style="display: none; width: 100%; max-width: 1200px;">
+            <video autoplay loop muted playsinline controls style="width: 100%; height: auto;">
+              <source src="./static/videos/3dgs_mosaic.webm" type="video/webm">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </center>
+        <script>
+            // Set default active button
+            document.getElementById('reconstruction_button').classList.add('active');
+            
+            function switchReconstructionMode(mode) {
+                // Remove active class from all buttons
+                document.getElementById('reconstruction_button').classList.remove('active');
+                document.getElementById('sensor_button').classList.remove('active');
+                
+                // Add active class to clicked button
+                if (mode === 'reconstruction') {
+                    document.getElementById('reconstruction_button').classList.add('active');
+                    document.getElementById('reconstruction_container').style.display = 'block';
+                    document.getElementById('sensor_container').style.display = 'none';
+                } else if (mode === 'sensor') {
+                    document.getElementById('sensor_button').classList.add('active');
+                    document.getElementById('reconstruction_container').style.display = 'none';
+                    document.getElementById('sensor_container').style.display = 'block';
+                }
+            }
+        </script>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- Failure Cases -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered ">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Why Existing Pipelines Fail?</h2>
+        <div class="content has-text-justified">
+          <center>
+            <!-- Mode selection buttons (reverted to original button style) -->
+            <button class="btn" id="rgb_button" onclick="switchVideo('rgb')">1. View Diversity &amp; 3D Reconstruction</button>
+            <button class="btn" id="depth_button" onclick="switchVideo('depth')">2. Source of Geometry</button>
+            <button class="btn" id="normal_button" onclick="switchVideo('normal')">3. Photorealistic Sensor Simulation</button>
+            <br>
+            <br>
+            <!-- Added explanatory bullet points for rgb button -->
+            <ul id="rgb_bullet_points" class="feature-points" style="text-align:left; max-width: 900px; margin: 0 auto 1.25rem auto; font-size: 1.05rem;">
+              <li>Casual videos tend to have <b>unidirectional capture</b>, whereas our capture has <b>diverse camera views</b>.</li>
+              <li>Vision-only 3D reconstruction is still <b>NOT</b> as good as multi-sensor fusion SLAM (click tab below).</li>
+            </ul>
+
+            <!-- Added explanatory bullet points for depth button -->
+            <ul id="depth_bullet_points" class="feature-points" style="display: none; text-align:left; max-width: 900px; margin: 0 auto 1.25rem auto; font-size: 1.05rem;">
+              <li>Surface reconstruction from neural implicit representation is not reliable. We extract mesh directly from LiDAR point clouds</li>
+              <li>Cleaning and filtering after surface reconstruction is also important</li>
+            </ul>
+
+            <!-- Comparison / Radar custom underline tabs (for rgb button) -->
+            <nav id="rgb_tabs" class="failure-mode-tabs" aria-label="Failure mode view switch">
+              <ul class="failure-mode-tablist">
+                <li id="comparison_tab" class="active-tab" role="tab" aria-selected="true" onclick="showFailureMode('comparison')">Pipeline Comparison</li>
+                <li id="radar_tab" role="tab" aria-selected="false" onclick="showFailureMode('radar')">Vision-only 3D Reconstructions</li>
+              </ul>
+            </nav>
+
+            <!-- Depth navigation tabs (Different Capture / Same Capture) -->
+            <nav id="depth_tabs" class="failure-mode-tabs" style="display: none;" aria-label="Capture type view switch">
+              <ul class="failure-mode-tablist">
+              <li id="different_capture_tab" class="active-tab" role="tab" aria-selected="true" onclick="showCaptureType('different_capture')">Whole Pipeline Comparison (Different Captures)</li>
+                <li id="same_capture_tab" role="tab" aria-selected="false" onclick="showCaptureType('same_capture')">Geometry Extraction Comparison (Same Captures)</li>
+              </ul>
+            </nav>
+
+            <!-- Photorealistic Sensor Simulation navigation tabs -->
+            <nav id="normal_tabs" class="failure-mode-tabs" style="display: none;" aria-label="Sensor simulation view switch">
+              <ul class="failure-mode-tablist">
+                <li id="whole_pipeline_tab" class="active-tab" role="tab" aria-selected="true" onclick="showSensorSimMode('whole_pipeline')">Whole Pipeline Comparison (Different Captures)</li>
+                <li id="nvs_comparison_tab" role="tab" aria-selected="false" onclick="showSensorSimMode('nvs_comparison')">NVS Comparison (Same Captures)</li>
+              </ul>
+            </nav>
+            
+            <!-- Comparison sliders for rgb button -->
+            <div id="rgb_comparison_container" style="width: 100%; max-width: 1200px; display: block;">
+              <div class="sliders-container">
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_colmap_vid2sim.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_colmap_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_colmap_gaussgym.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_colmap_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comparison sliders for depth button - Different Capture -->
+            <div id="depth_different_capture_container" style="display: none; width: 100%; max-width: 1200px;">
+              <div class="sliders-container">
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_mesh_vid2sim.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_mesh_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_mesh_gaussgym.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/3rdst_mesh_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comparison sliders for depth button - Same Capture -->
+            <div id="depth_same_capture_container" style="display: none; width: 100%; max-width: 1200px;">
+              <div class="sliders-container">
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/courant_mesh_vid2sim.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/courant_mesh_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <video slot="first" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/courant_mesh_gaussgym.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <video slot="second" autoplay loop muted playsinline style="width: 100%; height: auto;">
+                      <source src="./static/videos/courant_mesh_ours.webm" type="video/webm">
+                      Your browser does not support the video tag.
+                    </video>
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Radar chart container (hidden by default) -->
+            <div id="radar_container" style="display:none; width:100%; max-width:600px;">
+              <img src="./static/images/3d_recon_radar.png" alt="3D Reconstruction Radar Chart" style="width:100%; height:auto;" />
+              <p class="has-text-grey is-size-6" style="margin-top:0.5rem;">
+                Outermost ring indicates the most satisfactory 3D reconstruction (our data).
+              </p>
+            </div>
+
+            <!-- Whole Pipeline Comparison (Different Captures) - for normal button -->
+            <div id="normal_whole_pipeline_container" style="display: none; width: 100%; max-width: 1200px;">
+              <!-- First row: RGB comparisons -->
+              <div class="sliders-container" style="margin-bottom: 1rem;">
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/3rdst_rgb_vid2sim.png" style="width: 100%; height: auto;" alt="Vid2Sim RGB">
+                    <img slot="second" src="./static/images/3rdst_rgb_ours.png" style="width: 100%; height: auto;" alt="Ours RGB">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/3rdst_rgb_gaussgym.png" style="width: 100%; height: auto;" alt="GaussGym RGB">
+                    <img slot="second" src="./static/images/3rdst_rgb_ours.png" style="width: 100%; height: auto;" alt="Ours RGB">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+              <!-- Second row: Depth comparisons -->
+              <div class="sliders-container">
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/3rdst_depth_vid2sim.png" style="width: 100%; height: auto;" alt="Vid2Sim Depth">
+                    <img slot="second" src="./static/images/3rdst_depth_ours.png" style="width: 100%; height: auto;" alt="Ours Depth">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/3rdst_depth_gaussgym.png" style="width: 100%; height: auto;" alt="GaussGym Depth">
+                    <img slot="second" src="./static/images/3rdst_depth_ours.png" style="width: 100%; height: auto;" alt="Ours Depth">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+            </div>
+            <!-- Column captions -->
+            <div class="sliders-container" style="margin-top: 1rem;">
+              <div style="width: 32%; text-align: center;">
+                <p style="font-weight: 600; font-size: 1rem; margin: 0.5rem 0;">RGB</p>
+              </div>
+              <div style="width: 32%; text-align: center;">
+                <p style="font-weight: 600; font-size: 1rem; margin: 0.5rem 0;">DINOv3</p>
+              </div>
+              <div style="width: 32%; text-align: center;">
+                <p style="font-weight: 600; font-size: 1rem; margin: 0.5rem 0;">Grounded SAM2</p>
+              </div>
+            </div>
+            <!-- NVS Comparison (Same Captures) - for normal button -->
+            <div id="normal_nvs_comparison_container" style="display: none; width: 100%; max-width: 1200px;">
+              <!-- First row: All vid2sim vs ours (RGB, DINOv3, SAM) -->
+              <div class="sliders-container" style="margin-bottom: 1rem;">
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/vid2sim_rgb.png" style="width: 100%; height: auto;" alt="Vid2Sim RGB">
+                    <img slot="second" src="./static/images/nvs_vis/wanderland_rgb.png" style="width: 100%; height: auto;" alt="Ours RGB">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/vid2sim_dino.webp" style="width: 100%; height: auto;" alt="Vid2Sim DINOv3">
+                    <img slot="second" src="./static/images/nvs_vis/gt_dino.webp" style="width: 100%; height: auto;" alt="Ground Truth DINOv3">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ground Truth</span>
+                </div>
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/vid2sim_sam.webp" style="width: 100%; height: auto;" alt="Vid2Sim SAM">
+                    <img slot="second" src="./static/images/nvs_vis/wanderland_sam.webp" style="width: 100%; height: auto;" alt="Ours SAM">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">Vid2Sim</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+              <!-- Second row: All gaussgym vs ours (RGB, DINOv3, SAM) -->
+              <div class="sliders-container">
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/gaussgym_rgb.png" style="width: 100%; height: auto;" alt="GaussGym RGB">
+                    <img slot="second" src="./static/images/nvs_vis/wanderland_rgb.png" style="width: 100%; height: auto;" alt="Ours RGB">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/gaussgym_dino.webp" style="width: 100%; height: auto;" alt="GaussGym DINOv3">
+                    <img slot="second" src="./static/images/nvs_vis/gt_dino.webp" style="width: 100%; height: auto;" alt="Ground Truth DINOv3">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ground Truth</span>
+                </div>
+                <div class="slider-wrapper" style="width: 32%;">
+                  <img-comparison-slider class="slider-with-animated-handle">
+                    <img slot="first" src="./static/images/nvs_vis/gaussgym_sam.webp" style="width: 100%; height: auto;" alt="GaussGym SAM">
+                    <img slot="second" src="./static/images/nvs_vis/wanderland_sam.webp" style="width: 100%; height: auto;" alt="Ours SAM">
+                    <svg slot="handle" class="custom-animated-handle" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" viewBox="-8 -3 16 6">
+                      <path stroke="url(#sliderGradient)" d="M -5 -2 L -7 0 L -5 2 M -5 -2 L -5 2 M 5 -2 L 7 0 L 5 2 M 5 -2 L 5 2" stroke-width="2" fill="url(#sliderGradient)" vector-effect="non-scaling-stroke"></path>
+                    </svg>
+                  </img-comparison-slider>
+                  <span class="comparison-label comparison-label--first">GaussGym</span>
+                  <span class="comparison-label comparison-label--second">Ours</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Single video player for normal button (legacy, now hidden) -->
+            <div id="single_video_container" style="display: none;">
+              <video muted autoplay loop width="700px" height="400px" controls controls id="videoPlayer">
+                <source src="./static/videos/rgb.mp4" type="video/mp4">
+              </video>
+            </div>
+          </center>
+            <script>
+                // Initialize active state for rgb button (now styled as tab)
+                document.getElementById('rgb_button').classList.add('active');
+                // Track current failure mode view (comparison or radar)
+                let currentFailureMode = 'comparison';
+                // Track current capture type view (different_capture or same_capture)
+                let currentCaptureType = 'different_capture';
+                // Track current sensor simulation mode view (whole_pipeline or nvs_comparison)
+                let currentSensorSimMode = 'whole_pipeline';
+                
+                function switchVideo(videoSrc) {
+                    // If radar mode is active, force back to comparison to show videos
+                    if (currentFailureMode === 'radar') {
+                      showFailureMode('comparison');
+                    }
+                    
+                    document.getElementById('rgb_button').classList.remove('active');
+                    document.getElementById('depth_button').classList.remove('active');
+                    document.getElementById('normal_button').classList.remove('active');
+                    if (document.getElementById('touch_button')) {
+                      document.getElementById('touch_button').classList.remove('active');
+                    }
+
+                    document.getElementById(videoSrc+'_button').classList.add('active');
+                    
+                    // Show/hide bullet points
+                    const rgbBulletPoints = document.getElementById('rgb_bullet_points');
+                    const depthBulletPoints = document.getElementById('depth_bullet_points');
+                    
+                    // Show/hide tabs
+                    const rgbTabs = document.getElementById('rgb_tabs');
+                    const depthTabs = document.getElementById('depth_tabs');
+                    const normalTabs = document.getElementById('normal_tabs');
+                    
+                    // Show/hide appropriate containers
+                    const rgbContainer = document.getElementById('rgb_comparison_container');
+                    const singleVideoContainer = document.getElementById('single_video_container');
+                    const depthDifferentCaptureContainer = document.getElementById('depth_different_capture_container');
+                    const depthSameCaptureContainer = document.getElementById('depth_same_capture_container');
+                    const normalWholePipelineContainer = document.getElementById('normal_whole_pipeline_container');
+                    const normalNvsComparisonContainer = document.getElementById('normal_nvs_comparison_container');
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    
+                    if (videoSrc === 'rgb') {
+                      // Show rgb content
+                      rgbBulletPoints.style.display = 'block';
+                      depthBulletPoints.style.display = 'none';
+                      rgbTabs.style.display = 'block';
+                      depthTabs.style.display = 'none';
+                      normalTabs.style.display = 'none';
+                      rgbContainer.style.display = 'block';
+                      singleVideoContainer.style.display = 'none';
+                      depthDifferentCaptureContainer.style.display = 'none';
+                      depthSameCaptureContainer.style.display = 'none';
+                      normalWholePipelineContainer.style.display = 'none';
+                      normalNvsComparisonContainer.style.display = 'none';
+                    } else if (videoSrc === 'depth') {
+                      // Show depth content
+                      rgbBulletPoints.style.display = 'none';
+                      depthBulletPoints.style.display = 'block';
+                      rgbTabs.style.display = 'none';
+                      depthTabs.style.display = 'block';
+                      normalTabs.style.display = 'none';
+                      rgbContainer.style.display = 'none';
+                      singleVideoContainer.style.display = 'none';
+                      depthDifferentCaptureContainer.style.display = 'none';
+                      depthSameCaptureContainer.style.display = 'none';
+                      normalWholePipelineContainer.style.display = 'none';
+                      normalNvsComparisonContainer.style.display = 'none';
+                      // Show appropriate depth container based on current capture type
+                      if (currentCaptureType === 'different_capture') {
+                        depthDifferentCaptureContainer.style.display = 'block';
+                      } else {
+                        depthSameCaptureContainer.style.display = 'block';
+                      }
+                    } else if (videoSrc === 'normal') {
+                      // Show normal/photorealistic sensor simulation content
+                      rgbBulletPoints.style.display = 'none';
+                      depthBulletPoints.style.display = 'none';
+                      rgbTabs.style.display = 'none';
+                      depthTabs.style.display = 'none';
+                      normalTabs.style.display = 'block';
+                      rgbContainer.style.display = 'none';
+                      singleVideoContainer.style.display = 'none';
+                      depthDifferentCaptureContainer.style.display = 'none';
+                      depthSameCaptureContainer.style.display = 'none';
+                      normalWholePipelineContainer.style.display = 'none';
+                      normalNvsComparisonContainer.style.display = 'none';
+                      // Show appropriate normal container based on current sensor sim mode
+                      if (currentSensorSimMode === 'whole_pipeline') {
+                        normalWholePipelineContainer.style.display = 'block';
+                      } else {
+                        normalNvsComparisonContainer.style.display = 'block';
+                      }
+                    } else {
+                      // Legacy fallback for other video sources
+                      rgbBulletPoints.style.display = 'none';
+                      depthBulletPoints.style.display = 'none';
+                      rgbTabs.style.display = 'none';
+                      depthTabs.style.display = 'none';
+                      normalTabs.style.display = 'none';
+                      rgbContainer.style.display = 'none';
+                      depthDifferentCaptureContainer.style.display = 'none';
+                      depthSameCaptureContainer.style.display = 'none';
+                      normalWholePipelineContainer.style.display = 'none';
+                      normalNvsComparisonContainer.style.display = 'none';
+                      singleVideoContainer.style.display = 'block';
+                      videoPlayer.src = './static/videos/' + videoSrc + '.mp4';
+                      videoPlayer.play();  // Play automatically when the video is switched
+                    }
+                }
+
+                function showFailureMode(mode) {
+                  const comparisonTab = document.getElementById('comparison_tab');
+                  const radarTab = document.getElementById('radar_tab');
+                  const rgbContainer = document.getElementById('rgb_comparison_container');
+                  const singleVideoContainer = document.getElementById('single_video_container');
+                  const radarContainer = document.getElementById('radar_container');
+
+                  if (mode === 'comparison') {
+                    currentFailureMode = 'comparison';
+                    comparisonTab.classList.add('active-tab');
+                    radarTab.classList.remove('active-tab');
+                    comparisonTab.setAttribute('aria-selected','true');
+                    radarTab.setAttribute('aria-selected','false');
+                    // Show either rgb comparison or single video depending on active button
+                    const activeButton = document.querySelector('.btn.active');
+                    if (activeButton && activeButton.id.startsWith('rgb')) {
+                      rgbContainer.style.display = 'block';
+                      singleVideoContainer.style.display = 'none';
+                    } else {
+                      // If depth/normal selected
+                      if (document.getElementById('depth_button').classList.contains('active') ||
+                          document.getElementById('normal_button').classList.contains('active')) {
+                        rgbContainer.style.display = 'none';
+                        singleVideoContainer.style.display = 'block';
+                      } else {
+                        // Default fallback
+                        rgbContainer.style.display = 'block';
+                        singleVideoContainer.style.display = 'none';
+                      }
+                    }
+                    radarContainer.style.display = 'none';
+                  } else if (mode === 'radar') {
+                    currentFailureMode = 'radar';
+                    comparisonTab.classList.remove('active-tab');
+                    radarTab.classList.add('active-tab');
+                    comparisonTab.setAttribute('aria-selected','false');
+                    radarTab.setAttribute('aria-selected','true');
+                    // Hide all comparison/video containers
+                    rgbContainer.style.display = 'none';
+                    singleVideoContainer.style.display = 'none';
+                    radarContainer.style.display = 'block';
+                  }
+                }
+
+                function showCaptureType(captureType) {
+                  const differentCaptureTab = document.getElementById('different_capture_tab');
+                  const sameCaptureTab = document.getElementById('same_capture_tab');
+                  const depthDifferentCaptureContainer = document.getElementById('depth_different_capture_container');
+                  const depthSameCaptureContainer = document.getElementById('depth_same_capture_container');
+
+                  if (captureType === 'different_capture') {
+                    currentCaptureType = 'different_capture';
+                    differentCaptureTab.classList.add('active-tab');
+                    sameCaptureTab.classList.remove('active-tab');
+                    differentCaptureTab.setAttribute('aria-selected','true');
+                    sameCaptureTab.setAttribute('aria-selected','false');
+                    depthDifferentCaptureContainer.style.display = 'block';
+                    depthSameCaptureContainer.style.display = 'none';
+                  } else if (captureType === 'same_capture') {
+                    currentCaptureType = 'same_capture';
+                    differentCaptureTab.classList.remove('active-tab');
+                    sameCaptureTab.classList.add('active-tab');
+                    differentCaptureTab.setAttribute('aria-selected','false');
+                    sameCaptureTab.setAttribute('aria-selected','true');
+                    depthDifferentCaptureContainer.style.display = 'none';
+                    depthSameCaptureContainer.style.display = 'block';
+                  }
+                }
+
+                function showSensorSimMode(mode) {
+                  const wholePipelineTab = document.getElementById('whole_pipeline_tab');
+                  const nvsComparisonTab = document.getElementById('nvs_comparison_tab');
+                  const normalWholePipelineContainer = document.getElementById('normal_whole_pipeline_container');
+                  const normalNvsComparisonContainer = document.getElementById('normal_nvs_comparison_container');
+
+                  if (mode === 'whole_pipeline') {
+                    currentSensorSimMode = 'whole_pipeline';
+                    wholePipelineTab.classList.add('active-tab');
+                    nvsComparisonTab.classList.remove('active-tab');
+                    wholePipelineTab.setAttribute('aria-selected','true');
+                    nvsComparisonTab.setAttribute('aria-selected','false');
+                    normalWholePipelineContainer.style.display = 'block';
+                    normalNvsComparisonContainer.style.display = 'none';
+                  } else if (mode === 'nvs_comparison') {
+                    currentSensorSimMode = 'nvs_comparison';
+                    wholePipelineTab.classList.remove('active-tab');
+                    nvsComparisonTab.classList.add('active-tab');
+                    wholePipelineTab.setAttribute('aria-selected','false');
+                    nvsComparisonTab.setAttribute('aria-selected','true');
+                    normalWholePipelineContainer.style.display = 'none';
+                    normalNvsComparisonContainer.style.display = 'block';
+                  }
+                }
+            </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- Method Overview -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered ">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Our Framework</h2>
+        <center>
+          <!-- Framework image -->
+          <div id="overview">
+            <img src="./static/images/our_solution.png" style="width: 100%; min-width: 330px; max-width: 100%;" alt="Overview Image">
+          </div>
+
+          <!-- Framework description -->
+          <div class="content has-text-justified" style="max-width: 900px; margin: 1.5rem auto; font-size: 1.05rem; line-height: 1.7;">
+            <ol style="text-align: left; padding-left: 2rem;">
+              <li>Our pipeline begins with <b>multi-sensor capture</b> using the MetaCam device in real-world urban spaces.</li>
+              <li>MetaCam Studio processes the raw data via <b>LIV-SLAM</b> to produce a colorized, globally consistent metric point cloud and accurate camera poses.</li>
+              <li>We initialize 3D Gaussians from the metric point cloud and render per-view depth maps from this initialization.</li>
+              <li>The 3DGS model is optimized with <b>both photometric and depth losses</b>.</li>
+              <li>In parallel, we <b>extract a reliable collision mesh</b> from the same global point cloud.</li>
+              <li>We <b>integrate the trained 3DGS model</b> and the collision mesh into a single USD scene.</li>
+              <li>The USD scene can be <b>directly loaded into Isaac Sim</b> for training and evaluating navigation policies.</li>
+            </ol>
+          </div>
+        </center>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- Data Statistics and Comparison -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        
+        <h2 class="title is-3">Data Statistics and Comparison</h2>
+        <center>
+          <img src="./static/images/dataset.png" style="width: 100%; max-width: 1200px; height: auto;" alt="Dataset Statistics and Comparison">
+        </center>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX"> 
+  <div class="container is-max-desktop content">
+    <center>
+    <h2 id="bibtexTitle" class="title">BibTeX</h2>
+    <button id="copyButton" onclick="copyToClipboard()">
+      <i class="fas fa-copy"></i>
+    </button>
+    <br>
+    <pre style="display: inline-flex; text-align: left";><code id="bibtexInfo">
+Coming Soon
+      </code>
+    </pre>
+  </center>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.<br>
+            This AI4CE template is created by <a href="https://irvingf7.github.io/">Irving Fang</a>.<br>
+            This webpage template is originally from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>. 
+            We sincerely thank <a href="https://keunhong.com/">Keunhong Park</a> for developing and open-sourcing this template.
+            This website is then inspired by the project page of <a href="https://cat3d.github.io/">CAT3D</a>, <a href="https://armlabstanford.github.io/touch-gs">Touch-GS</a> and <a href="https://baegwangbin.github.io/DSINE/">DSINE</a>.
+          </p>
+        </div>
+      </div>
+          </p>
+        </div>
+      </div>
+  </div>
+</footer>
+
+</body>
+
+</html>

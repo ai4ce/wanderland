@@ -1,0 +1,383 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+
+#copyButton{
+
+  margin-top: 0px;
+  margin-right: 10px;
+  border-radius: 5px;
+  border: 0px solid #ccc;
+  background-color: #fff;
+  padding: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#copyButton:hover{
+  background-color: #eee;
+}
+
+#bibtexTitle{
+  margin-bottom: 0px;
+}
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dnerf {
+  font-variant: small-caps;
+}
+
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.teaser {
+  font-family: 'Google Sans', sans-serif;
+}
+
+
+.publication-banner {
+  max-height: parent;
+
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-title {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+.publication-authors a {
+   color: hsl(204, 86%, 53%) !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 0;
+}
+
+.results-carousel video {
+  margin: 0;
+}
+
+
+.interpolation-panel {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.interpolation-panel .interpolation-image {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+#interpolation-image-wrapper {
+  width: 100%;
+}
+#interpolation-image-wrapper img {
+  border-radius: 5px;
+}
+
+.slider-block{
+  display: none; /* Hide all divs initially */
+  opacity: 0;
+}
+
+.slider-block.show{
+  display: block;
+  opacity: 1;
+}
+
+.sliders-container {
+  display: flex;
+  justify-content: space-between; /* Or 'space-around' for more spacing */
+  gap: 0px; /* Adds space between the sliders */
+  flex-wrap: unset; /* Prevents the sliders from wrapping */
+}
+
+.slider-wrapper {
+  width: 48%; /* Make each slider 48% of the container width for side-by-side */
+  position: relative;
+}
+
+.comparison-label {
+  position: absolute;
+  top: 12px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border: 1px solid #c0c0c0;
+  color: #2e3452;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-size: 0.85rem;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.comparison-label--first {
+  left: 12px;
+}
+
+.comparison-label--second {
+  right: 12px;
+}
+
+#trans_depth, #trans_normal, #trans_rgb, #trans_object, 
+#transparent_9_depth, #transparent_9_normal, #transparent_9_rgb, #transparent_9_gt, 
+#transparent_9_depth, #transparent_9_normal, #transparent_9_rgb, #transparent_9_gt, 
+#black_9_depth, #black_9_normal, #black_9_rgb, #black_9_gt,
+#black_5_depth, #black_5_normal, #black_5_rgb, #black_5_gt,
+#reflective_9_depth, #reflective_9_normal, #reflective_9_rgb, #reflective_9_gt,
+#reflective_5_depth, #reflective_5_normal, #reflective_5_rgb, #reflective_5_gt,
+#coke_9_depth, #coke_9_normal, #coke_9_rgb, #coke_9_gt,
+#coke_5_depth, #coke_5_normal, #coke_5_rgb, #coke_5_gt {
+  width: 100%; /* General width for all sliders */
+}
+
+.btn {
+  background: linear-gradient(90deg, rgb(16,185,129), rgb(76,29,149)) !important;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: filter 0.25s ease, transform 0.25s ease;
+}
+.btn:hover {
+  filter: brightness(1.08) saturate(1.05);
+  transform: translateY(-2px);
+}
+.btn:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+.btn.active {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.6), 0 4px 14px rgba(76,29,149,0.35);
+  filter: brightness(1.02);
+}
+.btn.inactive {
+  opacity: 0.85;
+}
+.btn:not(.active) {
+  filter: brightness(0.88) saturate(0.9) contrast(0.98);
+  opacity: 0.85;
+}
+.btn:not(.active):hover {
+  filter: brightness(1.0) saturate(1.05) contrast(1.02);
+  opacity: 1;
+}
+
+/* this is for text and image block */
+.hidden {
+  display: none;
+}
+
+.navbar-item.center {
+  flex-grow: 0;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Style for img-comparison-slider handle to make it more visible on white background */
+img-comparison-slider {
+  --default-handle-width: 120px;
+  --divider-width: 2px;
+  --divider-color: #4c1d95;
+  --slider-gradient-start: rgb(16,185,129);
+  --slider-gradient-end: rgb(76,29,149);
+}
+
+/* Custom animated handle styling */
+.custom-animated-handle {
+  transition: transform 0.2s;
+  filter: drop-shadow(0px 0px 8px rgba(139, 0, 225, 0.6));
+}
+
+.slider-with-animated-handle:hover .custom-animated-handle {
+  transform: scale(1.2);
+  filter: drop-shadow(0px 0px 12px rgba(139, 0, 225, 0.8));
+}
+
+.slider-with-animated-handle .custom-animated-handle:active {
+  transform: scale(1.1);
+}
+
+/* Styles for comparison slider labels */
+.before,
+.after {
+  margin: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.before video,
+.after video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.before figcaption,
+.after figcaption {
+  background: #fff;
+  border: 1px solid #c0c0c0;
+  border-radius: 12px;
+  color: #2e3452;
+  opacity: 0.8;
+  padding: 12px;
+  position: absolute;
+  top: 12px;
+  line-height: 100%;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.before figcaption {
+  left: 12px;
+}
+
+.after figcaption {
+  right: 12px;
+}
+
+/* Failure mode custom tabs */
+.failure-mode-tabs {
+  border-bottom: 2px solid #e2e8f0; /* light horizontal line */
+  margin: 0 auto 1.25rem auto;
+  max-width: 900px;
+}
+
+.failure-mode-tablist {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  margin: 0;
+  padding: 0.35rem 0 0.15rem 0;
+  position: relative;
+  font-family: 'Google Sans', sans-serif;
+}
+
+.failure-mode-tablist li {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #444;
+  position: relative;
+  padding: 0.475rem 0.35rem; /* uniform padding for horizontal alignment */
+  transition: color .18s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.failure-mode-tablist li:hover {
+  color: #8b00e1;
+}
+
+.failure-mode-tablist li.active-tab {
+  color: #8b00e1;
+}
+
+.failure-mode-tablist li.active-tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px; /* sits on top of border-bottom line */
+  height: 4px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, rgb(16,185,129), rgb(76,29,149)); /* match brand gradient */
+  box-shadow: 0 2px 6px rgba(139,0,225,0.25);
+}
+
+@media (max-width: 640px) {
+  .failure-mode-tablist { gap: 1.75rem; }
+  .failure-mode-tablist li { font-size: 0.85rem; }
+}
