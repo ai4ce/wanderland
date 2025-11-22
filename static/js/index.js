@@ -75,4 +75,107 @@ $(document).ready(function() {
 
     bulmaSlider.attach();
 
+    setupComparisonVideoSync();
+
 })
+
+function waitForVideoReady(video) {
+  return new Promise(resolve => {
+    if (video.readyState >= 2) {
+      resolve();
+      return;
+    }
+    const onReady = () => {
+      video.removeEventListener('loadeddata', onReady);
+      video.removeEventListener('canplaythrough', onReady);
+      resolve();
+    };
+    video.addEventListener('loadeddata', onReady);
+    video.addEventListener('canplaythrough', onReady);
+  });
+}
+
+function syncVideoGroup(videos) {
+  if (!videos.length) {
+    return;
+  }
+  const master = videos[0];
+  const playGroup = () => {
+    videos.forEach(video => {
+      if (video.paused) {
+        video.play().catch(() => {});
+      }
+    });
+  };
+  const alignTimes = () => {
+    const referenceTime = master.currentTime;
+    videos.forEach((video, index) => {
+      if (index === 0) {
+        return;
+      }
+      const delta = Math.abs(video.currentTime - referenceTime);
+      if (delta > 0.05) {
+        video.currentTime = referenceTime;
+      }
+    });
+  };
+
+  videos.forEach(video => {
+    video.loop = true;
+    video.muted = true;
+    video.autoplay = false;
+    video.playsInline = true;
+    video.pause();
+    try {
+      video.currentTime = 0;
+    } catch (error) {
+      // Some browsers may block currentTime if metadata isn't loaded yet.
+    }
+  });
+
+  Promise.all(videos.map(waitForVideoReady)).then(() => {
+    videos.forEach(video => {
+      try {
+        video.currentTime = 0;
+      } catch (error) {
+        // Ignore seek errors before metadata is ready.
+      }
+    });
+    playGroup();
+  });
+
+  master.addEventListener('timeupdate', alignTimes);
+  master.addEventListener('seeked', alignTimes);
+  master.addEventListener('play', playGroup);
+  master.addEventListener('pause', () => {
+    videos.forEach(video => {
+      if (!video.paused) {
+        video.pause();
+      }
+    });
+  });
+  master.addEventListener('ended', () => {
+    videos.forEach(video => {
+      try {
+        video.currentTime = 0;
+      } catch (error) {
+        // Ignore seek errors for safety.
+      }
+    });
+    playGroup();
+  });
+}
+
+function setupComparisonVideoSync() {
+  const sliders = document.querySelectorAll('img-comparison-slider');
+  sliders.forEach(slider => {
+    if (slider.dataset.synced === 'true') {
+      return;
+    }
+    const videos = slider.querySelectorAll('video');
+    if (videos.length >= 2) {
+      slider.dataset.synced = 'true';
+      syncVideoGroup(Array.from(videos));
+    }
+  });
+}
