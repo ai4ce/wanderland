@@ -380,4 +380,14 @@ img-comparison-slider {
 @media (max-width: 640px) {
   .failure-mode-tablist { gap: 1.75rem; }
   .failure-mode-tablist li { font-size: 0.85rem; }
+  
+  /* Stack comparison sliders vertically on mobile */
+  .sliders-container {
+    flex-wrap: wrap;
+  }
+  
+  .slider-wrapper {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
 }
