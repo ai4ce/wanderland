@@ -1,13 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="description"
-        content="Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI">
-  <meta name="keywords" content="Embodied AI, Visual Navigation, Simulation, 3D Reconstruction, Novel View Synthesis">     
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wanderland</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'><text y='58' font-size='60'>🔮</text></svg>">
+  
+  <!-- Primary Meta Tags -->
+  <title>Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI</title>
+  <meta name="title" content="Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI">
+  <meta name="description" content="Wanderland provides metric-scale geometric grounding for trustworthy embodied AI benchmarking through multi-sensor capture, LiDAR-based reconstruction, and photorealistic 3D Gaussian Splatting simulation.">
+  <meta name="keywords" content="Wanderland, Embodied AI, Visual Navigation, Simulation, 3D Reconstruction, Novel View Synthesis, 3D Gaussian Splatting, LiDAR SLAM, Isaac Sim, Robotics, Computer Vision, NYU AI4CE">
+  <meta name="author" content="Xinhao Liu, Jiaqi Li, Youming Deng, Ruxin Chen, Yingjia Zhang, Yifei Ma, Li Guo, Yiming Li, Jing Zhang, Chen Feng">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ai4ce.github.io/wanderland/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ai4ce.github.io/wanderland/">
+  <meta property="og:title" content="Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI">
+  <meta property="og:description" content="Wanderland provides metric-scale geometric grounding for trustworthy embodied AI benchmarking through multi-sensor capture, LiDAR-based reconstruction, and photorealistic 3D Gaussian Splatting simulation.">
+  <meta property="og:image" content="https://ai4ce.github.io/wanderland/static/images/logo.png">
+  <meta property="og:site_name" content="Wanderland">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://ai4ce.github.io/wanderland/">
+  <meta property="twitter:title" content="Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI">
+  <meta property="twitter:description" content="Wanderland provides metric-scale geometric grounding for trustworthy embodied AI benchmarking through multi-sensor capture, LiDAR-based reconstruction, and photorealistic 3D Gaussian Splatting simulation.">
+  <meta property="twitter:image" content="https://ai4ce.github.io/wanderland/static/images/logo.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'><text y='58' font-size='60'>🔮</text></svg>">
+  
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "name": "Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI",
+    "headline": "Geometrically Grounded Simulation for Open-World Embodied AI",
+    "description": "Wanderland provides metric-scale geometric grounding for trustworthy embodied AI benchmarking through multi-sensor capture, LiDAR-based reconstruction, and photorealistic 3D Gaussian Splatting simulation.",
+    "image": "https://ai4ce.github.io/wanderland/static/images/logo.png",
+    "author": [
+      {"@type": "Person", "name": "Xinhao Liu", "url": "https://gaaaavin.github.io/"},
+      {"@type": "Person", "name": "Jiaqi Li", "url": "https://songard.github.io/"},
+      {"@type": "Person", "name": "Youming Deng", "url": "https://denghilbert.github.io/"},
+      {"@type": "Person", "name": "Ruxin Chen"},
+      {"@type": "Person", "name": "Yingjia Zhang"},
+      {"@type": "Person", "name": "Yifei Ma"},
+      {"@type": "Person", "name": "Li Guo"},
+      {"@type": "Person", "name": "Yiming Li", "url": "https://yimingli-page.github.io/"},
+      {"@type": "Person", "name": "Jing Zhang", "url": "https://jingz6676.github.io"},
+      {"@type": "Person", "name": "Chen Feng", "url": "https://scholar.google.com/citations?user=YeG8ZM0AAAAJ"}
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "New York University AI4CE Lab",
+      "url": "https://ai4ce.github.io/"
+    },
+    "datePublished": "2025",
+    "url": "https://ai4ce.github.io/wanderland/",
+    "sameAs": "https://arxiv.org/abs/2511.20620",
+    "keywords": "Embodied AI, Visual Navigation, Simulation, 3D Reconstruction, Novel View Synthesis, 3D Gaussian Splatting, LiDAR SLAM, Isaac Sim"
+  }
+  </script>
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
@@ -22,6 +77,15 @@
 
     gtag('config', 'G-PYVRSFMDRL');
   </script> -->
+  
+  <!-- Preconnect to external resources for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.knightlab.com">
+  <link rel="preconnect" href="https://unpkg.com">
+  
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
         rel="stylesheet">
 
@@ -179,8 +243,8 @@
           </div>
 
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup> New York University, </span>
-            <span class="author-block"><sup>2</sup> Cornell University, </span>
+            <span class="author-block"><sup>1</sup> New York University </span>
+            <span class="author-block"><sup>2</sup> Cornell University </span>
             <br>
             <span class="author-block">⚖️: Equal contribution, random order </span> <span style="margin-left: 1em;"></span>
             <span class="author-block">✉️: Corresponding author </span>
