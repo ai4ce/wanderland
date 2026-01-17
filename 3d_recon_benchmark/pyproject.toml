@@ -1,0 +1,10 @@
+[project]
+name = "wanderland-recon"
+version = "0.1.0"
+description = "Pose estimation evaluation tool for COLMAP sparse reconstructions"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.4.1",
+    "scipy>=1.17.0",
+]
