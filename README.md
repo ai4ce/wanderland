@@ -24,6 +24,8 @@
   </div>
 </div>
 
+[wanderland.webm](https://github.com/user-attachments/assets/247cce73-b570-4780-bd56-cf404b0eb2aa)
+
 # Release TODO
 - [ ] Simulation Code Release
 - [x] [Jan 17, 2026] 3D Reconstruction Benchmark Release
