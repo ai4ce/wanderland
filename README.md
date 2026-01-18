@@ -22,9 +22,11 @@
       <a href="https://jingz6676.github.io">Jing Zhang</a>,
       <a href="https://engineering.nyu.edu/faculty/chen-feng">Chen Feng</a>
   </div>
-</div>
 
-[wanderland.webm](https://github.com/user-attachments/assets/247cce73-b570-4780-bd56-cf404b0eb2aa)
+  <br>
+
+  ![](./assets/wanderland.gif)
+</div>
 
 # Release TODO
 - [ ] Simulation Code Release
