@@ -41,7 +41,7 @@ Note that all components use [uv](https://docs.astral.sh/uv/) for dependency man
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 * To download data from Hugging Face, check [data_processing](data_processing/README.md)
-* To benchmark 3D reconstruction methods, check [reconstruction](reconstruction/README.md)
+* To benchmark 3D reconstruction methods, check [3d_recon_benchmark](3d_recon_benchmark/README.md)
 * To evaluate navigation performance, check [navigation](navigation/README.md) [TODO]
 * To reproduce our reconstruction pipeline, check [reconstruction](reconstruction/README.md)
 
