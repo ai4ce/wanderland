@@ -1,0 +1,9 @@
+[project]
+name = "wanderland-navigation"
+version = "0.1.0"
+description = "Wanderland - Navigation Module"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy<2.0.0",
+]

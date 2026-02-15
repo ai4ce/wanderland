@@ -40,9 +40,9 @@ Note that all components use [uv](https://docs.astral.sh/uv/) for dependency man
 ```
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-* To download data from Hugging Face, check [data_processing](data_processing/README.md)
+* To download data from Hugging Face, check [download](download/README.md)
 * To benchmark 3D reconstruction methods, check [3d_recon_benchmark](3d_recon_benchmark/README.md)
-* To evaluate navigation performance, check [navigation](navigation/README.md) [TODO]
+* To generate navigation episodes / videos, check [navigation](navigation/README.md)
 * To reproduce our reconstruction pipeline, check [reconstruction](reconstruction/README.md)
 
 Each component have its own virtual environment. Remember to `deactivate` and reactivate the venv when switching between different components.

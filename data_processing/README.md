@@ -1,6 +1,6 @@
 # Data Processing Pipeline
 
-This directory contains standalone scripts for post-processing 3D Gaussian Splatting (3DGS) outputs. **Note:** Due to patent considerations, we are not releasing our 3DGS training pipeline. These scripts demonstrate the data processing steps that occur after 3DGS model training.
+This directory contains standalone scripts for post-processing 3D Gaussian Splatting (3DGS) outputs. The **training pipeline lives in** `reconstruction/`; this folder focuses on export / mesh / USDZ assembly utilities.
 
 ## Installation
 
@@ -61,6 +61,30 @@ python scene2usdz.py mesh.obj gaussian_splat.usdz output.usdz
 - `mesh`: Path to collision mesh (OBJ format)
 - `gs_usdz`: Path to 3DGS USDZ asset
 - `output`: Output USD/USDZ file
-- `--translate X Y Z`: Translation offset (default: 0 0 0)
-- `--rotate RX RY RZ`: Rotation in degrees (default: 0 0 0)
-- `--scale SX SY SZ`: Scale factors (default: 1 1 1)
+- `--translate X Y Z`: Translation applied to the collider (default: 0 0 0)
+- `--rotate RX RY RZ`: Rotation (degrees, XYZ) applied to the collider (default: 0 0 0)
+- `--scale SX SY SZ`: Scale applied to the collider (default: 1 1 1)
+- `--visual-translate X Y Z`: Optional translation applied to the referenced 3DGS visual asset
+- `--visual-rotate RX RY RZ`: Optional rotation (degrees, XYZ) applied to the referenced 3DGS visual asset
+- `--visual-scale SX SY SZ`: Optional scale applied to the referenced 3DGS visual asset
+
+### 4. ply2usdz_3dgrut.py 
+
+Convert a 3DGS-compatible Gaussian PLY (e.g., exported from `ckpt2ply.py`) into an Isaac/Omniverse-compatible USDZ **using NVIDIA 3DGRUT**.
+
+**Requirements**: install 3DGRUT (CUDA/toolchain requirements are managed by 3DGRUT).
+
+3DGRUT repo:
+```bash
+git clone --recursive https://github.com/nv-tlabs/3dgrut.git
+```
+
+**Usage:**
+```bash
+python ply2usdz_3dgrut.py gaussian.ply gaussian.usdz --python /path/to/3dgrut/python
+```
+
+Alternatively, you can run 3DGRUT's exporter directly:
+```bash
+python -m threedgrut.export.scripts.ply_to_usd gaussian.ply --output_file gaussian.usdz
+```
