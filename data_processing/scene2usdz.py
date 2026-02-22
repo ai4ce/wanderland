@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Compose a simple USD/USDZ stage from a collider OBJ and a 3DGS USDZ asset."""
+"""Compose a USD/USDZ stage from a collider OBJ and a 3DGS USD/Z asset.
+
+Alignment note:
+Some 3DGS USD/Z exporters apply internal conversion transforms to the visual prim.
+In our pipeline we keep the 3DGS asset "as-is" and apply an optional corrective
+transform to the collider Xform, so collisions match the rendered Gaussians in
+Isaac Sim.
+"""
+
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
-from typing import Sequence, Tuple
+from typing import Dict, Sequence, Tuple
 
 import numpy as np
 import trimesh
@@ -19,8 +27,7 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
             "and converting an OBJ mesh into a collider."
         )
     )
-    parser.add_argument("mesh", type=Path,
-                        help="Path to the collider OBJ file")
+    parser.add_argument("mesh", type=Path, help="Path to the collider OBJ file")
     parser.add_argument(
         "gs_usdz",
         type=Path,
@@ -54,6 +61,30 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
         default=(1.0, 1.0, 1.0),
         metavar=("SX", "SY", "SZ"),
         help="Non-uniform scale applied to the collider",
+    )
+    parser.add_argument(
+        "--visual-translate",
+        nargs=3,
+        type=float,
+        default=(0.0, 0.0, 0.0),
+        metavar=("X", "Y", "Z"),
+        help="Optional translation applied to the referenced 3DGS asset",
+    )
+    parser.add_argument(
+        "--visual-rotate",
+        nargs=3,
+        type=float,
+        default=(0.0, 0.0, 0.0),
+        metavar=("RX", "RY", "RZ"),
+        help="Optional rotation (degrees, XYZ order) applied to the referenced 3DGS asset",
+    )
+    parser.add_argument(
+        "--visual-scale",
+        nargs=3,
+        type=float,
+        default=(1.0, 1.0, 1.0),
+        metavar=("SX", "SY", "SZ"),
+        help="Optional non-uniform scale applied to the referenced 3DGS asset",
     )
     return parser.parse_args(argv)
 
@@ -91,8 +122,7 @@ def _finalize_output(stage_path: Path, final_path: Path) -> Path:
 
 
 def _load_mesh_data(mesh_path: Path) -> Tuple[np.ndarray, np.ndarray]:
-    mesh = trimesh.load(mesh_path, force="mesh",
-                        skip_materials=True, process=False)
+    mesh = trimesh.load(mesh_path, force="mesh", skip_materials=True, process=False)
     if mesh.is_empty or mesh.vertices is None or mesh.faces is None:
         raise ValueError(f"Unable to read mesh faces from {mesh_path}")
     if not mesh.is_winding_consistent:
@@ -112,9 +142,21 @@ def _np_to_vec3f_array(vertices: np.ndarray) -> Vt.Vec3fArray:
     return Vt.Vec3fArray([Gf.Vec3f(float(x), float(y), float(z)) for x, y, z in vertices])
 
 
-def _build_collider(stage: Usd.Stage, mesh_data: Tuple[np.ndarray, np.ndarray]) -> None:
+def _apply_xform_ops(prim: Usd.Prim, transforms: Dict[str, Tuple[float, float, float]]) -> None:
+    xformable = UsdGeom.Xformable(prim)
+    xformable.AddScaleOp().Set(Gf.Vec3d(*transforms["scale"]))
+    xformable.AddRotateXYZOp().Set(Gf.Vec3d(*transforms["rotate"]))
+    xformable.AddTranslateOp().Set(Gf.Vec3d(*transforms["translate"]))
+
+
+def _build_collider(
+    stage: Usd.Stage,
+    mesh_data: Tuple[np.ndarray, np.ndarray],
+    transforms: Dict[str, Tuple[float, float, float]],
+) -> None:
     vertices, faces = mesh_data
     collider_xform = UsdGeom.Xform.Define(stage, "/World/Collider")
+    _apply_xform_ops(collider_xform.GetPrim(), transforms)
 
     mesh_prim = UsdGeom.Mesh.Define(stage, "/World/Collider/Mesh")
     mesh_prim.CreateSubdivisionSchemeAttr().Set(UsdGeom.Tokens.none)
@@ -128,8 +170,7 @@ def _build_collider(stage: Usd.Stage, mesh_data: Tuple[np.ndarray, np.ndarray]) 
     mins = vertices.min(axis=0)
     maxs = vertices.max(axis=0)
     mesh_prim.CreateExtentAttr().Set(
-        Vt.Vec3fArray([Gf.Vec3f(*mins.astype(float)),
-                      Gf.Vec3f(*maxs.astype(float))])
+        Vt.Vec3fArray([Gf.Vec3f(*mins.astype(float)), Gf.Vec3f(*maxs.astype(float))])
     )
 
     # Collider is hidden from rendering but participates in physics collisions.
@@ -137,12 +178,13 @@ def _build_collider(stage: Usd.Stage, mesh_data: Tuple[np.ndarray, np.ndarray]) 
     UsdPhysics.CollisionAPI.Apply(mesh_prim.GetPrim())
 
 
-def _attach_visual_reference(stage: Usd.Stage, asset_path: Path, transforms: dict) -> None:
+def _attach_visual_reference(
+    stage: Usd.Stage,
+    asset_path: Path,
+    transforms: Dict[str, Tuple[float, float, float]],
+) -> None:
     visual = UsdGeom.Xform.Define(stage, "/World/Visual")
-    xformable = UsdGeom.Xformable(visual.GetPrim())
-    xformable.AddScaleOp().Set(Gf.Vec3d(*transforms["scale"]))
-    xformable.AddRotateXYZOp().Set(Gf.Vec3d(*transforms["rotate"]))
-    xformable.AddTranslateOp().Set(Gf.Vec3d(*transforms["translate"]))
+    _apply_xform_ops(visual.GetPrim(), transforms)
     visual.GetPrim().GetReferences().AddReference(str(asset_path))
 
 
@@ -152,26 +194,33 @@ def assemble_single_scene(args: argparse.Namespace) -> Path:
     stage_path, final_path = _prepare_stage_and_output_paths(args.output)
 
     stage = Usd.Stage.CreateNew(str(stage_path))
-    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+    # Keep the assembled scene consistent with Z-up 3DGS assets used in Isaac Sim.
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
 
     world = UsdGeom.Xform.Define(stage, "/World")
     stage.SetDefaultPrim(world.GetPrim())
 
-    transforms = {
+    collider_transforms = {
         "translate": tuple(args.translate),
         "rotate": tuple(args.rotate),
         "scale": tuple(args.scale),
     }
-    _attach_visual_reference(stage, gs_path, transforms)
+    visual_transforms = {
+        "translate": tuple(args.visual_translate),
+        "rotate": tuple(args.visual_rotate),
+        "scale": tuple(args.visual_scale),
+    }
+
+    _attach_visual_reference(stage, gs_path, visual_transforms)
     mesh_data = _load_mesh_data(mesh_path)
-    _build_collider(stage, mesh_data)
+    _build_collider(stage, mesh_data, collider_transforms)
 
     stage.GetRootLayer().Save()
     return _finalize_output(stage_path, final_path)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _parse_args(argv)
+    args = _parse_args(argv or sys.argv[1:])
     try:
         result = assemble_single_scene(args)
     except Exception as exc:  # noqa: BLE001 - surface clear errors for CLI users

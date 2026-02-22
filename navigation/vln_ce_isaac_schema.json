@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/vln-ce-isaac-dataset.schema.json",
+  "title": "VLN-CE Isaac Dataset",
+  "description": "Vision-Language Navigation in Continuous Environments dataset for Isaac Lab simulation. This dataset contains navigation episodes with natural language instructions for training embodied AI agents.",
+  "type": "object",
+  "required": ["episodes"],
+  "properties": {
+    "episodes": {
+      "type": "array",
+      "description": "List of navigation episodes, each containing a complete navigation task",
+      "items": {
+        "$ref": "#/definitions/Episode"
+      }
+    }
+  },
+  "definitions": {
+    "Episode": {
+      "type": "object",
+      "description": "A single navigation episode representing one complete navigation task from start to goal",
+      "required": [
+        "episode_id",
+        "scene_id",
+        "start_position",
+        "start_rotation",
+        "geodesic_distance",
+        "goals",
+        "instruction",
+        "reference_path",
+        "gt_locations",
+        "gt_steps"
+      ],
+      "properties": {
+        "episode_id": {
+          "type": "integer",
+          "description": "Unique identifier for this navigation episode within the dataset",
+          "minimum": 1,
+          "example": 1
+        },
+        "scene_id": {
+          "type": "string",
+          "description": "Path to the 3D scene file (USD/GLB format). Format: 'provider/scene_identifier' where provider can be 'mp3d' (Matterport3D), 'Urbansim', etc.",
+          "pattern": "^[\\w]+/[\\w_-]+$",
+          "examples": [
+            "mp3d/zsNo4HB9uLZ/zsNo4HB9uLZ.glb",
+            "Urbansim/1_hEI1lHi5zqbyJDh3UVpLHJzSr_muadM"
+          ]
+        },
+        "start_position": {
+          "type": "array",
+          "description": "Starting 3D position of the robot in world coordinates (meters). Format: [x, y, z]",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "example": [15.068599700927734, 4.4848198890686035, 0.17162801325321198]
+        },
+        "start_rotation": {
+          "type": "array",
+          "description": "Starting orientation of the robot as a quaternion. Format: [x, y, z, w] following the Hamilton convention (scalar-last)",
+          "items": {
+            "type": "number",
+            "minimum": -1.0,
+            "maximum": 1.0
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "example": [0.25881901383399963, 0.0, 0.0, 0.9659258127212524]
+        },
+        "geodesic_distance": {
+          "type": "number",
+          "description": "Shortest path distance from start position to goal position in meters (ignoring obstacles)",
+          "minimum": 0.0,
+          "example": 7.9608235359191895
+        },
+        "goals": {
+          "type": "array",
+          "description": "List of goal specifications. Typically contains one goal, but can support multiple goals for complex tasks",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/Goal"
+          }
+        },
+        "instruction": {
+          "type": "string",
+          "description": "Natural language navigation instruction in English describing the path from start to goal. Instructions are human-written and describe landmarks, directions, and stopping conditions",
+          "minLength": 10,
+          "example": "Exit the bedroom and turn left. Walk straight passing the gray couch and stop near the rug."
+        },
+        "reference_path": {
+          "type": "array",
+          "description": "High-level reference path as a sequence of waypoints. These are key positions along the optimal path, typically 4-10 waypoints that define the general trajectory",
+          "items": {
+            "$ref": "#/definitions/Position3D"
+          },
+          "minItems": 2
+        },
+        "gt_locations": {
+          "type": "array",
+          "description": "Ground truth trajectory as a dense sequence of 3D positions. Sampled at regular intervals (typically 0.25m steps) along the optimal path. Used for imitation learning and trajectory evaluation",
+          "items": {
+            "$ref": "#/definitions/Position3D"
+          },
+          "minItems": 2
+        },
+        "gt_steps": {
+          "type": "integer",
+          "description": "Total number of forward steps in the ground truth trajectory. Does not include turning actions",
+          "minimum": 1,
+          "example": 32
+        }
+      }
+    },
+    "Goal": {
+      "type": "object",
+      "description": "Defines a goal location and success criteria for navigation",
+      "required": ["position", "radius"],
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/Position3D",
+          "description": "Target position in 3D world coordinates (meters)"
+        },
+        "radius": {
+          "type": "number",
+          "description": "Success radius in meters. The robot is considered to have reached the goal if it gets within this distance of the goal position",
+          "minimum": 0.0,
+          "default": 3.0,
+          "example": 3.0
+        }
+      }
+    },
+    "Position3D": {
+      "type": "array",
+      "description": "3D position in world coordinates. Format: [x, y, z] in meters",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  },
+  "examples": [
+    {
+      "episodes": [
+        {
+          "episode_id": 1,
+          "scene_id": "Urbansim/1_hEI1lHi5zqbyJDh3UVpLHJzSr_muadM",
+          "start_position": [15.068599700927734, 4.4848198890686035, 0.17162801325321198],
+          "start_rotation": [0.25881901383399963, 0.0, 0.0, 0.9659258127212524],
+          "geodesic_distance": 7.9608235359191895,
+          "goals": [
+            {
+              "position": [13.04640007019043, -1.8739700317382812, 0.17162801325321198],
+              "radius": 3.0
+            }
+          ],
+          "instruction": "Walk straight ahead, stop at the black iron gate, then turn right. Pass through the gate, go past the bench, and stop next to the black trash can.",
+          "reference_path": [
+            [15.068599700927734, 4.4848198890686035, 0.17162801325321198],
+            [13.64939975738525, 4.241700172424316, 0.17162801325321198]
+          ],
+          "gt_locations": [
+            [15.068599700927734, 4.4848198890686035, 0.17162801325321198],
+            [14.818599700927734, 4.4848198890686035, 0.17162801325321198]
+          ],
+          "gt_steps": 32
+        }
+      ]
+    }
+  ]
+}
