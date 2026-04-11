@@ -1,4 +1,4 @@
-# [CVPR 2026]Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI
+# [CVPR 2026 Highlight]Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI
 <div align="center">
   <a href="https://arxiv.org/abs/2511.20620" target="_blank">
       <img alt="arXiv" src="https://img.shields.io/badge/arXiv-Wanderland-red?logo=arxiv" height="25" />
