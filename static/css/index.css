@@ -81,6 +81,11 @@ body {
     font-weight: bolder;
 }
 
+.cvpr-highlight,
+.cvpr-highlight a {
+    color: #ff3860;
+}
+
 .publication-authors a {
    color: hsl(204, 86%, 53%) !important;
 }
