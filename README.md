@@ -28,11 +28,8 @@
   ![](./assets/wanderland.gif)
 </div>
 
-<div align="center" style="background-color:#fff3cd; border-left: 6px solid #f0ad4e; padding: 12px; border-radius: 6px;">
-
-⚠️ <b>Dataset Update In Progress</b> — Known issues found in our <a href="https://huggingface.co/datasets/ai4ce/wanderland">🤗 Hugging Face dataset</a>. Fixed version expected by <b>end of May 2026</b>.
-
-</div>
+> [!WARNING]
+> **Dataset Update In Progress** — Known issues found in our [dataset](https://huggingface.co/datasets/ai4ce/wanderland). Fixed version expected by **end of May 2026**.
 
 # Release TODO
 - [ ] Simulation Code Release
