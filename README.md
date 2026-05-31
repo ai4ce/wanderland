@@ -1,4 +1,4 @@
-# [CVPR 2026 Highlight] Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI
+# Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI [CVPR'26 Award Candidate] 
 <div align="center">
   <a href="https://arxiv.org/abs/2511.20620" target="_blank">
       <img alt="arXiv" src="https://img.shields.io/badge/arXiv-Wanderland-red?logo=arxiv" height="25" />
@@ -28,13 +28,16 @@
   ![](./assets/wanderland.gif)
 </div>
 
-> [!WARNING]
-> **Dataset Update In Progress** — Known issues found in our [dataset](https://huggingface.co/datasets/ai4ce/wanderland). Fixed version expected by **end of May 2026**.
+> [!NOTE]
+> Wanderland is selected as **Award Candidate** in CVPR 2026 (**1.8%** accepted papers) 🎉
+
+> [!CAUTION]
+> **Dataset Update In Progress** — Known issues found in our [dataset](https://huggingface.co/datasets/ai4ce/wanderland). Fixed version expected by **early June 2026**.
 
 # Release TODO
 - [ ] Simulation Code Release
-- [x] [Jan 17, 2026] 3D Reconstruction Benchmark Release
-- [x] [Jan 17, 2026] Data Release
+- [x] [Jan 2026] 3D Reconstruction Benchmark Release
+- [x] [Jan 2026] Data Release
 
 # Getting Started
 Wanderland is a comprehensive framework that consists of many different components. 
@@ -52,17 +55,17 @@ Each component have its own virtual environment. Remember to `deactivate` and re
 
 # Citation
 ```
-@article{liu2025wanderland,
+@inproceedings{liu2026wanderland,
   title={Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI},
   author={Liu, Xinhao and Li, Jiaqi and Deng, Youming and Chen, Ruxin and Zhang, Yingjia and Ma, Yifei and Guo, Li and Li, Yiming and Zhang, Jing and Feng, Chen},
-  journal={arXiv preprint arXiv:2511.20620},
-  year={2025}
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={1041--1052},
+  year={2026}
 }
 ```
 
 # Related Projects
 **Real-to-Sim**:
-* [CityWalker: Learning Embodied Urban Navigation from Web-Scale Videos](https://github.com/ai4ce/CityWalker), CVPR 2025
 * [Vid2Sim: Realistic and Interactive Simulation from Video for Urban Navigation](https://github.com/Vid2Sim/Vid2Sim), CVPR 2025
 * [Gauss Gym: A Geometrically Grounded Simulation Environment for Embodied AI](https://github.com/escontra/gauss_gym), arXiv 2025
 * [BEHAVIOR-1K: A Human-Centered, Embodied AI Benchmark with 1,000 Everyday Activities and Realistic Simulation](https://github.com/StanfordVL/BEHAVIOR-1K), arXiv 2024
