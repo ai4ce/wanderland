@@ -1,4 +1,4 @@
-# Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI [CVPR'26 Award Candidate] 
+# Wanderland: Geometrically Grounded Simulation for Open-World Embodied AI [CVPR'26 Highlight] 
 <div align="center">
   <a href="https://arxiv.org/abs/2511.20620" target="_blank">
       <img alt="arXiv" src="https://img.shields.io/badge/arXiv-Wanderland-red?logo=arxiv" height="25" />
@@ -27,9 +27,6 @@
 
   ![](./assets/wanderland.gif)
 </div>
-
-> [!NOTE]
-> Wanderland is selected as **Award Candidate** in CVPR 2026 (**1.8%** accepted papers) 🎉
 
 > [!CAUTION]
 > **Dataset Update In Progress** — Known issues found in our [dataset](https://huggingface.co/datasets/ai4ce/wanderland). Fixed version expected by **early June 2026**.
