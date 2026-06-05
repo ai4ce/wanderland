@@ -181,6 +181,62 @@ body {
   position: relative;
 }
 
+.visual-highlight-intro {
+  max-width: 900px;
+  margin: 0 auto 1.25rem auto;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  text-align: center !important;
+}
+
+.visual-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.visual-highlight-card {
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background: #05070a;
+}
+
+.visual-highlight-card--wide {
+  grid-column: 1 / -1;
+}
+
+.visual-highlight-card video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #05070a;
+}
+
+.visual-highlight-caption {
+  padding: 0.8rem 0.95rem 0.9rem;
+  background: #fff;
+  text-align: left;
+}
+
+.visual-highlight-caption h3 {
+  margin: 0 0 0.3rem;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.visual-highlight-caption p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #4a4a4a;
+}
+
 .comparison-label {
   position: absolute;
   top: 12px;
@@ -394,5 +450,9 @@ img-comparison-slider {
   .slider-wrapper {
     width: 100%;
     margin-bottom: 1rem;
+  }
+
+  .visual-highlight-grid {
+    grid-template-columns: 1fr;
   }
 }

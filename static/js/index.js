@@ -16,17 +16,23 @@ function setInterpolationImage(i) {
   var image = interp_images[i];
   image.ondragstart = function() { return false; };
   image.oncontextmenu = function() { return false; };
-  $('#interpolation-image-wrapper').empty().append(image);
+  var wrapper = document.getElementById('interpolation-image-wrapper');
+  if (wrapper) {
+    wrapper.replaceChildren(image);
+  }
 }
 
 
-$(document).ready(function() {
-    // Check for click events on the navbar burger icon
-    $(".navbar-burger").click(function() {
-      // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-      $(".navbar-burger").toggleClass("is-active");
-      $(".navbar-menu").toggleClass("is-active");
-
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.navbar-burger:not([onclick])').forEach(function(burger) {
+      burger.addEventListener('click', function() {
+        document.querySelectorAll('.navbar-burger').forEach(function(el) {
+          el.classList.toggle('is-active');
+        });
+        document.querySelectorAll('.navbar-menu').forEach(function(el) {
+          el.classList.toggle('is-active');
+        });
+      });
     });
 
     var options = {
@@ -58,26 +64,22 @@ $(document).ready(function() {
     	});
     }
 
-    /*var player = document.getElementById('interpolation-video');
-    player.addEventListener('loadedmetadata', function() {
-      $('#interpolation-slider').on('input', function(event) {
-        console.log(this.value, player.duration);
-        player.currentTime = player.duration / 100 * this.value;
-      })
-    }, false);*/
     preloadInterpolationImages();
 
-    $('#interpolation-slider').on('input', function(event) {
-      setInterpolationImage(this.value);
-    });
-    setInterpolationImage(0);
-    $('#interpolation-slider').prop('max', NUM_INTERP_FRAMES - 1);
+    var interpolationSlider = document.getElementById('interpolation-slider');
+    if (interpolationSlider) {
+      interpolationSlider.addEventListener('input', function() {
+        setInterpolationImage(this.value);
+      });
+      interpolationSlider.max = NUM_INTERP_FRAMES - 1;
+      setInterpolationImage(0);
+    }
 
     bulmaSlider.attach();
 
     setupComparisonVideoSync();
 
-})
+});
 
 function waitForVideoReady(video) {
   return new Promise(resolve => {

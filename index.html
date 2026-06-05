@@ -105,7 +105,7 @@
   <script defer src="./static/js/fontawesome.all.min.js"></script>
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
+  <script src="./static/js/index.js?v=visual-highlights"></script>
   <script src="./static/js/copy2clipboard.js"></script>
   <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
@@ -899,6 +899,68 @@
                   }
                 }
             </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- Dataset Visual Highlights -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Dataset Visual Highlights</h2>
+        <div class="content has-text-justified visual-highlight-intro">
+          <p>Wanderland captures large-scale indoor, outdoor, and mixed lighting scenes with metrically aligned geometry. These synchronized fly-throughs highlight the dataset's visual diversity, coverage scale, and embodied evaluation setup.</p>
+        </div>
+
+        <div class="visual-highlight-grid">
+          <article class="visual-highlight-card visual-highlight-card--wide">
+            <video muted playsinline controls preload="metadata">
+              <source src="./static/videos/wanderland_multimodal_quality_lighting.mp4?v=compressed-720p" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="visual-highlight-caption">
+              <h3>Multimodal Data Quality</h3>
+              <p>Aligned multimodal signals, reconstruction quality, and lighting variation across captured scenes.</p>
+            </div>
+          </article>
+
+          <article class="visual-highlight-card visual-highlight-card--wide">
+            <video muted playsinline controls preload="metadata">
+              <source src="./static/videos/wanderland_coverage_scale.mp4?v=compressed-720p" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="visual-highlight-caption">
+              <h3>Scene Coverage and Scale</h3>
+              <p>Large and non-overlapping trajectories that stress open-world coverage.</p>
+            </div>
+          </article>
+
+          <article class="visual-highlight-card visual-highlight-card--wide">
+            <video muted playsinline controls preload="metadata">
+              <source src="./static/videos/wanderland_robot_walkthrough.mp4?v=compressed-720p" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="visual-highlight-caption">
+              <h3>Embodied Navigation</h3>
+              <p>Unity walkthroughs with metric mesh collision and photorealistic 3DGS rendering.</p>
+            </div>
+          </article>
+
+          <article class="visual-highlight-card visual-highlight-card--wide">
+            <video muted playsinline controls preload="metadata">
+              <source src="./static/videos/wanderland_navigation_tasks.mp4?v=compressed-720p" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="visual-highlight-caption">
+              <h3>Navigation Task Formats</h3>
+              <p>Language, image-goal, and point-goal task examples for embodied evaluation.</p>
+            </div>
+          </article>
         </div>
       </div>
     </div>
