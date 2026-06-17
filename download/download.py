@@ -1,35 +1,74 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 import argparse
+import csv
 import tarfile
 import shutil
+from collections import Counter
 from pathlib import Path
 from typing import List
 
-from huggingface_hub import HfApi, hf_hub_download, snapshot_download
+from huggingface_hub import hf_hub_download, snapshot_download
 
 # Constants
 DATASET_REPO = "ai4ce/wanderland"
+PUBLIC_MANIFEST_FILE = "wanderland_public_manifest.csv"
 
 
-def list_available_scenes():
-    """Query HuggingFace API for available scenes."""
-    print(f"Fetching available scenes from {DATASET_REPO}...")
-    api = HfApi()
-    files = api.list_repo_files(DATASET_REPO, repo_type="dataset")
+def load_public_manifest():
+    """Load the public manifest that defines the currently released scenes."""
+    print(f"Fetching public manifest from {DATASET_REPO}/{PUBLIC_MANIFEST_FILE}...")
+    try:
+        manifest_path = hf_hub_download(
+            repo_id=DATASET_REPO,
+            repo_type="dataset",
+            filename=PUBLIC_MANIFEST_FILE,
+        )
+    except Exception as e:
+        print(f"Error: Failed to download public manifest: {e}")
+        sys.exit(1)
 
-    scenes = set()
-    for file in files:
-        # Look for files under data/{scene_name}/
-        if file.startswith("data/"):
-            parts = file.split("/")
-            if len(parts) >= 2:
-                scene_name = parts[1]
-                scenes.add(scene_name)
+    required_columns = {"scene_id", "quality_tier", "quality_tags"}
+    rows = []
+    with open(manifest_path, newline="") as f:
+        reader = csv.DictReader(f)
+        missing_columns = required_columns - set(reader.fieldnames or [])
+        if missing_columns:
+            print(
+                "Error: Public manifest is missing required columns: "
+                + ", ".join(sorted(missing_columns))
+            )
+            sys.exit(1)
 
-    return sorted(list(scenes))
+        for row in reader:
+            scene_id = row.get("scene_id", "").strip()
+            if not scene_id:
+                continue
+            row["scene_id"] = scene_id
+            row["quality_tier"] = row.get("quality_tier", "").strip()
+            row["quality_tags"] = row.get("quality_tags", "").strip()
+            rows.append(row)
+
+    if not rows:
+        print("Error: Public manifest contains no scenes")
+        sys.exit(1)
+
+    return rows
+
+
+def describe_public_manifest(rows):
+    """Print a concise summary of the loaded public manifest."""
+    versions = sorted({row.get("manifest_version", "").strip() for row in rows if row.get("manifest_version", "").strip()})
+    updated_at = sorted({row.get("manifest_updated_at", "").strip() for row in rows if row.get("manifest_updated_at", "").strip()})
+    tiers = Counter(row.get("quality_tier", "").strip() or "unspecified" for row in rows)
+
+    print(f"Found {len(rows)} released scenes in public manifest")
+    if versions:
+        print(f"Manifest version: {', '.join(versions)}")
+    if updated_at:
+        print(f"Manifest updated at: {', '.join(updated_at)}")
+    print("Quality tiers: " + ", ".join(f"{tier}={count}" for tier, count in sorted(tiers.items())))
 
 
 def download_file_from_hf(repo_id, filename, local_dir):
@@ -260,20 +299,20 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Download first 5 scenes for 3D reconstruction
-  python download.py --modality 3d --count 5
+  # Recommended: download showcase scenes for quick inspection
+  python download.py --modality nvs --quality-tier showcase
+
+  # Download evaluation-quality scenes for novel view synthesis
+  python download.py --modality nvs --quality-tier evaluation_ready
+
+  # Download first 5 training-ready scenes for 3D reconstruction
+  python download.py --modality 3d --quality-tier training_ready --count 5
 
   # Download specific scenes for novel view synthesis
   python download.py --modality nvs --scenes scene_001 scene_002
 
-  # Download all scenes (full data)
+  # Explicitly download every scene listed in the public manifest
   python download.py --modality full --all
-
-  # Download scenes from a list file for navigation tasks
-  python download.py --modality navigation --scene-list train_scenes_v1.txt
-
-  # Download evaluation scenes for benchmarking
-  python download.py --modality nvs --scene-list eval_scenes_v1.txt --output ../wanderland_data
         """
     )
 
@@ -296,13 +335,8 @@ Examples:
         help="Output directory for downloaded data (default: ../wanderland_data)"
     )
 
-    # Scene selection (mutually exclusive)
-    scene_group = parser.add_mutually_exclusive_group(required=True)
-    scene_group.add_argument(
-        "--count",
-        type=int,
-        help="Download first N scenes"
-    )
+    # Scene selection (mutually exclusive, with --count as an optional limiter)
+    scene_group = parser.add_mutually_exclusive_group()
     scene_group.add_argument(
         "--scenes",
         nargs="+",
@@ -318,8 +352,27 @@ Examples:
         type=str,
         help="Path to text file containing scene names (one per line, # for comments)"
     )
+    scene_group.add_argument(
+        "--quality-tier",
+        type=str,
+        help="Download scenes from a public manifest quality tier, e.g. showcase, "
+             "evaluation_ready, or training_ready"
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        help="Limit the selected scenes to the first N entries"
+    )
 
     args = parser.parse_args()
+
+    if not any([args.scenes, args.all, args.scene_list, args.quality_tier, args.count]):
+        parser.error(
+            "choose a scene selector: --quality-tier, --scene-list, --scenes, --all, or --count"
+        )
+
+    if args.count is not None and args.count <= 0:
+        parser.error("--count must be a positive integer")
 
     # Create output directory
     output_dir = Path(args.output)
@@ -331,32 +384,49 @@ Examples:
     print(f"Output: {output_dir.absolute()}")
     print("="*60)
 
-    # Get list of available scenes
-    available_scenes = list_available_scenes()
-    print(f"Found {len(available_scenes)} available scenes")
+    # Get list of currently released scenes from the public manifest.
+    manifest_rows = load_public_manifest()
+    describe_public_manifest(manifest_rows)
+    available_scenes = [row["scene_id"] for row in manifest_rows]
+    available_scene_set = set(available_scenes)
 
     # Determine which scenes to download
     scenes_to_download = []
 
     if args.all:
         scenes_to_download = available_scenes
-        print(f"Downloading all {len(scenes_to_download)} scenes")
+        print(f"Selected all {len(scenes_to_download)} manifest scenes")
 
-    elif args.count:
-        scenes_to_download = available_scenes[:args.count]
-        print(f"Downloading first {len(scenes_to_download)} scenes")
+    elif args.quality_tier:
+        scenes_to_download = [
+            row["scene_id"]
+            for row in manifest_rows
+            if row.get("quality_tier", "") == args.quality_tier
+        ]
+
+        if not scenes_to_download:
+            available_tiers = sorted({
+                row.get("quality_tier", "").strip()
+                for row in manifest_rows
+                if row.get("quality_tier", "").strip()
+            })
+            print(f"Error: No scenes found for quality tier '{args.quality_tier}'")
+            print(f"Available quality tiers: {', '.join(available_tiers)}")
+            sys.exit(1)
+
+        print(f"Selected {len(scenes_to_download)} scenes from quality tier '{args.quality_tier}'")
 
     elif args.scenes:
         # Validate scene names
         invalid_scenes = []
         for scene in args.scenes:
-            if scene in available_scenes:
+            if scene in available_scene_set:
                 scenes_to_download.append(scene)
             else:
                 invalid_scenes.append(scene)
 
         if invalid_scenes:
-            print(f"Warning: Invalid scene names: {invalid_scenes}")
+            print(f"Warning: Scene names not found in public manifest: {invalid_scenes}")
 
         if not scenes_to_download:
             print("Error: No valid scenes specified")
@@ -375,19 +445,34 @@ Examples:
         # Validate scene names
         invalid_scenes = []
         for scene in requested_scenes:
-            if scene in available_scenes:
+            if scene in available_scene_set:
                 scenes_to_download.append(scene)
             else:
                 invalid_scenes.append(scene)
 
         if invalid_scenes:
-            print(f"Warning: Invalid scene names in file: {invalid_scenes}")
+            print(f"Warning: Scene names not found in public manifest: {invalid_scenes}")
 
         if not scenes_to_download:
             print("Error: No valid scenes in list file")
             sys.exit(1)
 
         print(f"Downloading {len(scenes_to_download)} scenes from list file")
+
+    elif args.count:
+        scenes_to_download = available_scenes[:args.count]
+        print(f"Selected first {len(scenes_to_download)} manifest scenes")
+
+    count_only_selection = args.count is not None and not any([
+        args.scenes,
+        args.all,
+        args.scene_list,
+        args.quality_tier,
+    ])
+    if args.count is not None and not count_only_selection:
+        original_count = len(scenes_to_download)
+        scenes_to_download = scenes_to_download[:args.count]
+        print(f"Applying --count {args.count}: {len(scenes_to_download)} of {original_count} selected scenes")
 
     # Download each scene
     success_count = 0
