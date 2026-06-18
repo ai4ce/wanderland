@@ -7,7 +7,6 @@ import tarfile
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import List
 
 from huggingface_hub import hf_hub_download, snapshot_download
 
@@ -29,7 +28,7 @@ def load_public_manifest():
         print(f"Error: Failed to download public manifest: {e}")
         sys.exit(1)
 
-    required_columns = {"scene_id", "quality_tier", "quality_tags"}
+    required_columns = {"scene_id", "quality_tier"}
     rows = []
     with open(manifest_path, newline="") as f:
         reader = csv.DictReader(f)
@@ -47,7 +46,6 @@ def load_public_manifest():
                 continue
             row["scene_id"] = scene_id
             row["quality_tier"] = row.get("quality_tier", "").strip()
-            row["quality_tags"] = row.get("quality_tags", "").strip()
             rows.append(row)
 
     if not rows:
@@ -366,13 +364,24 @@ Examples:
 
     args = parser.parse_args()
 
-    if not any([args.scenes, args.all, args.scene_list, args.quality_tier, args.count]):
-        parser.error(
-            "choose a scene selector: --quality-tier, --scene-list, --scenes, --all, or --count"
-        )
+    if args.quality_tier is not None:
+        args.quality_tier = args.quality_tier.strip()
+        if not args.quality_tier:
+            parser.error("--quality-tier must be a non-empty string")
 
     if args.count is not None and args.count <= 0:
         parser.error("--count must be a positive integer")
+
+    if not any([
+        args.scenes,
+        args.all,
+        args.scene_list,
+        args.quality_tier,
+        args.count is not None,
+    ]):
+        parser.error(
+            "choose a scene selector: --quality-tier, --scene-list, --scenes, --all, or --count"
+        )
 
     # Create output directory
     output_dir = Path(args.output)
