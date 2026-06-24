@@ -15,6 +15,11 @@ DATASET_REPO = "ai4ce/wanderland"
 PUBLIC_MANIFEST_FILE = "wanderland_public_manifest.csv"
 
 
+def clean_manifest_value(row, field):
+    """Return a manifest field as a stripped string, treating missing values as empty."""
+    return (row.get(field) or "").strip()
+
+
 def load_public_manifest():
     """Load the public manifest that defines the currently released scenes."""
     print(f"Fetching public manifest from {DATASET_REPO}/{PUBLIC_MANIFEST_FILE}...")
@@ -41,11 +46,11 @@ def load_public_manifest():
             sys.exit(1)
 
         for row in reader:
-            scene_id = row.get("scene_id", "").strip()
+            scene_id = clean_manifest_value(row, "scene_id")
             if not scene_id:
                 continue
             row["scene_id"] = scene_id
-            row["quality_tier"] = row.get("quality_tier", "").strip()
+            row["quality_tier"] = clean_manifest_value(row, "quality_tier")
             rows.append(row)
 
     if not rows:
@@ -57,9 +62,9 @@ def load_public_manifest():
 
 def describe_public_manifest(rows):
     """Print a concise summary of the loaded public manifest."""
-    versions = sorted({row.get("manifest_version", "").strip() for row in rows if row.get("manifest_version", "").strip()})
-    updated_at = sorted({row.get("manifest_updated_at", "").strip() for row in rows if row.get("manifest_updated_at", "").strip()})
-    tiers = Counter(row.get("quality_tier", "").strip() or "unspecified" for row in rows)
+    versions = sorted({clean_manifest_value(row, "manifest_version") for row in rows if clean_manifest_value(row, "manifest_version")})
+    updated_at = sorted({clean_manifest_value(row, "manifest_updated_at") for row in rows if clean_manifest_value(row, "manifest_updated_at")})
+    tiers = Counter(clean_manifest_value(row, "quality_tier") or "unspecified" for row in rows)
 
     print(f"Found {len(rows)} released scenes in public manifest")
     if versions:
@@ -415,9 +420,9 @@ Examples:
 
         if not scenes_to_download:
             available_tiers = sorted({
-                row.get("quality_tier", "").strip()
+                clean_manifest_value(row, "quality_tier")
                 for row in manifest_rows
-                if row.get("quality_tier", "").strip()
+                if clean_manifest_value(row, "quality_tier")
             })
             print(f"Error: No scenes found for quality tier '{args.quality_tier}'")
             print(f"Available quality tiers: {', '.join(available_tiers)}")
