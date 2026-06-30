@@ -28,8 +28,8 @@
   ![](./assets/wanderland.gif)
 </div>
 
-> [!CAUTION]
-> **Dataset Update In Progress** — Known issues found in our [dataset](https://huggingface.co/datasets/ai4ce/wanderland). Fixed version expected by **early June 2026**.
+> [!NOTE]
+> Downloaded data is selected through the public Hugging Face manifest. See [`download/`](download/README.md) for quality-tier downloads such as `showcase`, `evaluation_ready`, and `training_ready`.
 
 # Release TODO
 - [ ] Simulation Code Release

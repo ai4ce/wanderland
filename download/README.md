@@ -1,8 +1,8 @@
 # Wanderland Dataset - Download Tool
 
-Download tool for the Wanderland dataset from HuggingFace. The Wanderland dataset contains 435 urban scenes with fisheye images, undistorted images, 3D reconstructions, and navigation data for embodied AI research.
+Download tool for the Wanderland dataset from Hugging Face. The current public manifest lists the released scenes with fisheye images, undistorted images, 3D reconstructions, and navigation data for embodied AI research.
 
-> **Note on Dataset Release (v1)**: The current public release contains **435 scenes**, which is a subset of the total scenes referenced in our paper. We have reserved some scenes for future research and challenge development. Wanderland is an ongoing project, and we are actively working to expand the dataset to **over 1,000 scenes** with additional modalities and annotations. Stay tuned for updates!
+> **Note on Dataset Release (v1)**: The public release is controlled by `wanderland_public_manifest.csv`. The manifest includes release metadata, quality tiers, and scene data paths, and may be updated as new scenes are added or repaired.
 
 ## Quick Start
 
@@ -38,7 +38,7 @@ The Wanderland dataset is available on HuggingFace at [`ai4ce/wanderland`](https
 - **Splits**: Train/validation splits for novel view synthesis (per-scene image splits)
 - **Navigation**: Isaac Sim compatible scene files (USDZ) and episode configurations
 
-The downloader reads the public manifest `wanderland_public_manifest.csv` by default. This manifest is the source of truth for currently released scenes and includes `quality_tier` values such as `showcase`, `evaluation_ready`, and `training_ready`. When present, the manifest `data_path` field is used to locate the scene files in the Hugging Face dataset.
+The downloader reads the public manifest `wanderland_public_manifest.csv` by default. This manifest is the source of truth for currently released scenes and includes `quality_tier` values such as `showcase`, `evaluation_ready`, and `training_ready`. The downloader uses the manifest `data_path` field to locate scene files in the Hugging Face dataset, so the remote folder layout can evolve without changing user commands.
 
 ## Download Modalities
 
@@ -191,12 +191,12 @@ python download.py --modality nvs --quality-tier evaluation_ready
 python download.py --modality 3d --quality-tier training_ready
 ```
 
-The dataset also includes two legacy scene-level split files used by the paper:
+The repository also includes two legacy scene-level split files used by the paper:
 
 - **`train_scenes_v1.txt`**: 235 training scenes in the paper split
 - **`eval_scenes_v1.txt`**: 200 evaluation scenes in the paper split
 
-Current public downloads are validated against the manifest, so future additions and repaired scenes can be released without changing the downloader.
+Current public downloads are validated against the manifest. If a legacy split contains scenes that are not in the current public manifest, the downloader skips them and reports a warning.
 
 ### Image-Level Splits (Novel View Synthesis)
 Each scene contains `nvs_split/train.txt` and `nvs_split/val.txt` that divide the images within that scene for novel view synthesis tasks.
