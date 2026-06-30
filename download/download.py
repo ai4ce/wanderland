@@ -20,6 +20,23 @@ def clean_manifest_value(row, field):
     return (row.get(field) or "").strip()
 
 
+def default_scene_data_path(scene_id):
+    """Return the legacy dataset path for a scene."""
+    return f"data/{scene_id}"
+
+
+def cleanup_empty_parents(path, stop_dir):
+    """Remove empty parent directories up to, but not including, stop_dir."""
+    path = Path(path)
+    stop_dir = Path(stop_dir).resolve()
+    while path.exists() and path.resolve() != stop_dir:
+        try:
+            path.rmdir()
+        except OSError:
+            break
+        path = path.parent
+
+
 def load_public_manifest():
     """Load the public manifest that defines the currently released scenes."""
     print(f"Fetching public manifest from {DATASET_REPO}/{PUBLIC_MANIFEST_FILE}...")
@@ -51,6 +68,10 @@ def load_public_manifest():
                 continue
             row["scene_id"] = scene_id
             row["quality_tier"] = clean_manifest_value(row, "quality_tier")
+            row["data_path"] = (
+                clean_manifest_value(row, "data_path").strip("/")
+                or default_scene_data_path(scene_id)
+            )
             rows.append(row)
 
     if not rows:
@@ -64,6 +85,7 @@ def describe_public_manifest(rows):
     """Print a concise summary of the loaded public manifest."""
     versions = sorted({clean_manifest_value(row, "manifest_version") for row in rows if clean_manifest_value(row, "manifest_version")})
     updated_at = sorted({clean_manifest_value(row, "manifest_updated_at") for row in rows if clean_manifest_value(row, "manifest_updated_at")})
+    release_versions = Counter(clean_manifest_value(row, "release_version") or "unspecified" for row in rows)
     tiers = Counter(clean_manifest_value(row, "quality_tier") or "unspecified" for row in rows)
 
     print(f"Found {len(rows)} released scenes in public manifest")
@@ -71,6 +93,8 @@ def describe_public_manifest(rows):
         print(f"Manifest version: {', '.join(versions)}")
     if updated_at:
         print(f"Manifest updated at: {', '.join(updated_at)}")
+    if release_versions:
+        print("Release versions: " + ", ".join(f"{version}={count}" for version, count in sorted(release_versions.items())))
     print("Quality tiers: " + ", ".join(f"{tier}={count}" for tier, count in sorted(tiers.items())))
 
 
@@ -89,11 +113,11 @@ def download_file_from_hf(repo_id, filename, local_dir):
         return None
 
 
-def download_directory_from_hf(repo_id, scene_name, directory_name, output_dir):
+def download_directory_from_hf(repo_id, scene_path, directory_name, output_dir):
     """Download entire directory from HuggingFace using snapshot_download."""
     try:
         # Download only files matching the directory pattern
-        pattern = f"data/{scene_name}/{directory_name}/**"
+        pattern = f"{scene_path}/{directory_name}/**"
 
         snapshot_download(
             repo_id=repo_id,
@@ -123,17 +147,19 @@ def untar_file(tar_path, extract_dir, remove_after=True):
         return False
 
 
-def download_scene(scene_name, modality, output_dir):
+def download_scene(scene_name, scene_path, modality, output_dir):
     """
     Download a scene based on the specified modality.
     
     Args:
         scene_name: Name of the scene to download
+        scene_path: Path to the scene directory in the HuggingFace dataset
         modality: Download modality ('3d', 'nvs', 'navigation', or 'full')
         output_dir: Root output directory
     """
     print(f"\n{'='*60}")
     print(f"Downloading scene: {scene_name} (modality: {modality})")
+    print(f"Source path: {scene_path}")
     print(f"{'='*60}")
 
     scene_output_dir = output_dir / scene_name
@@ -142,7 +168,7 @@ def download_scene(scene_name, modality, output_dir):
     if modality == "full":
         # Download entire scene directory
         print("Downloading full scene...")
-        pattern = f"data/{scene_name}/**"
+        pattern = f"{scene_path}/**"
 
         try:
             snapshot_download(
@@ -152,8 +178,8 @@ def download_scene(scene_name, modality, output_dir):
                 local_dir=output_dir,
             )
 
-            # Move files from data/{scene_name}/ to {scene_name}/
-            downloaded_scene_dir = output_dir / "data" / scene_name
+            # Move files from the manifest data_path to {scene_name}/
+            downloaded_scene_dir = output_dir / scene_path
 
             if downloaded_scene_dir.exists():
                 # Move all contents
@@ -168,7 +194,7 @@ def download_scene(scene_name, modality, output_dir):
 
                 # Clean up empty data directory
                 downloaded_scene_dir.rmdir()
-                (output_dir / "data").rmdir()
+                cleanup_empty_parents(downloaded_scene_dir.parent, output_dir)
 
             # Extract all tar.gz files
             for tar_file in scene_output_dir.glob("*.tar.gz"):
@@ -183,8 +209,8 @@ def download_scene(scene_name, modality, output_dir):
     elif modality == "navigation":
         # Download only navigation-related files for Isaac Sim
         files_to_download = [
-            f"data/{scene_name}/scene.usdz",
-            f"data/{scene_name}/episodes.json",
+            f"{scene_path}/scene.usdz",
+            f"{scene_path}/episodes.json",
         ]
 
         # Download files
@@ -197,7 +223,7 @@ def download_scene(scene_name, modality, output_dir):
             )
 
             if downloaded:
-                # Move from data/{scene_name}/ to {scene_name}/
+                # Move from the manifest data_path to {scene_name}/
                 src = output_dir / file_path
                 dst = scene_output_dir / Path(file_path).name
 
@@ -206,12 +232,10 @@ def download_scene(scene_name, modality, output_dir):
                     shutil.move(str(src), str(dst))
 
         # Clean up data directory structure
-        data_dir = output_dir / "data" / scene_name
+        data_dir = output_dir / scene_path
         if data_dir.exists() and not any(data_dir.iterdir()):
             data_dir.rmdir()
-        data_parent = output_dir / "data"
-        if data_parent.exists() and not any(data_parent.iterdir()):
-            data_parent.rmdir()
+        cleanup_empty_parents(data_dir.parent, output_dir)
 
         print(f"Navigation files downloaded to {scene_output_dir}")
 
@@ -222,16 +246,16 @@ def download_scene(scene_name, modality, output_dir):
 
         # Common files for both modes
         files_to_download.extend([
-            f"data/{scene_name}/images.tar.gz",
-            f"data/{scene_name}/images_mask.tar.gz",
+            f"{scene_path}/images.tar.gz",
+            f"{scene_path}/images_mask.tar.gz",
         ])
         dirs_to_download.append("sparse")
 
         if modality == "nvs":
             # Additional files for NVS mode
             files_to_download.extend([
-                f"data/{scene_name}/raw_pcd.ply",
-                f"data/{scene_name}/3dgs.ply",
+                f"{scene_path}/raw_pcd.ply",
+                f"{scene_path}/3dgs.ply",
             ])
             dirs_to_download.extend(["nvs_split"])
 
@@ -245,7 +269,7 @@ def download_scene(scene_name, modality, output_dir):
             )
 
             if downloaded:
-                # Move from data/{scene_name}/ to {scene_name}/
+                # Move from the manifest data_path to {scene_name}/
                 src = output_dir / file_path
                 dst = scene_output_dir / Path(file_path).name
 
@@ -258,13 +282,13 @@ def download_scene(scene_name, modality, output_dir):
             print(f"Downloading {dir_name}/ directory...")
             download_directory_from_hf(
                 DATASET_REPO,
-                scene_name,
+                scene_path,
                 dir_name,
                 output_dir
             )
 
-            # Move from data/{scene_name}/{dir_name}/ to {scene_name}/{dir_name}/
-            src_dir = output_dir / "data" / scene_name / dir_name
+            # Move from the manifest data_path/{dir_name}/ to {scene_name}/{dir_name}/
+            src_dir = output_dir / scene_path / dir_name
             dst_dir = scene_output_dir / dir_name
 
             if src_dir.exists():
@@ -273,12 +297,10 @@ def download_scene(scene_name, modality, output_dir):
                 shutil.move(str(src_dir), str(dst_dir))
 
         # Clean up data directory structure
-        data_dir = output_dir / "data" / scene_name
+        data_dir = output_dir / scene_path
         if data_dir.exists() and not any(data_dir.iterdir()):
             data_dir.rmdir()
-        data_parent = output_dir / "data"
-        if data_parent.exists() and not any(data_parent.iterdir()):
-            data_parent.rmdir()
+        cleanup_empty_parents(data_dir.parent, output_dir)
 
         # Extract tar.gz files
         for tar_file in scene_output_dir.glob("*.tar.gz"):
@@ -403,6 +425,7 @@ Examples:
     describe_public_manifest(manifest_rows)
     available_scenes = [row["scene_id"] for row in manifest_rows]
     available_scene_set = set(available_scenes)
+    manifest_by_scene = {row["scene_id"]: row for row in manifest_rows}
 
     # Determine which scenes to download
     scenes_to_download = []
@@ -496,7 +519,8 @@ Examples:
         print(f"\n[Scene {idx}/{len(scenes_to_download)}]")
 
         try:
-            success = download_scene(scene_name, args.modality, output_dir)
+            scene_path = manifest_by_scene[scene_name]["data_path"]
+            success = download_scene(scene_name, scene_path, args.modality, output_dir)
             if success:
                 success_count += 1
             else:

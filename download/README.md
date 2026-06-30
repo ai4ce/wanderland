@@ -38,7 +38,7 @@ The Wanderland dataset is available on HuggingFace at [`ai4ce/wanderland`](https
 - **Splits**: Train/validation splits for novel view synthesis (per-scene image splits)
 - **Navigation**: Isaac Sim compatible scene files (USDZ) and episode configurations
 
-The downloader reads the public manifest `wanderland_public_manifest.csv` by default. This manifest is the source of truth for currently released scenes and includes `quality_tier` values such as `showcase`, `evaluation_ready`, and `training_ready`.
+The downloader reads the public manifest `wanderland_public_manifest.csv` by default. This manifest is the source of truth for currently released scenes and includes `quality_tier` values such as `showcase`, `evaluation_ready`, and `training_ready`. When present, the manifest `data_path` field is used to locate the scene files in the Hugging Face dataset.
 
 ## Download Modalities
 
