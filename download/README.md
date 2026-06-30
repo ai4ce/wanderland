@@ -1,8 +1,8 @@
 # Wanderland Dataset - Download Tool
 
-Download tool for the Wanderland dataset from HuggingFace. The Wanderland dataset contains 435 urban scenes with fisheye images, undistorted images, 3D reconstructions, and navigation data for embodied AI research.
+Download tool for the Wanderland dataset from Hugging Face. The current public manifest lists the released scenes with fisheye images, undistorted images, 3D reconstructions, and navigation data for embodied AI research.
 
-> **Note on Dataset Release (v1)**: The current public release contains **435 scenes**, which is a subset of the total scenes referenced in our paper. We have reserved some scenes for future research and challenge development. Wanderland is an ongoing project, and we are actively working to expand the dataset to **over 1,000 scenes** with additional modalities and annotations. Stay tuned for updates!
+> **Note on Dataset Release (v1)**: The public release is controlled by `wanderland_public_manifest.csv`. The manifest includes release metadata, quality tiers, and scene data paths, and may be updated as new scenes are added or repaired.
 
 ## Quick Start
 
@@ -13,13 +13,16 @@ uv sync
 # Activate virtual environment
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Download evaluation scenes for novel view synthesis
-python download.py --modality nvs --scene-list eval_scenes_v1.txt
+# Recommended: download showcase scenes for quick visual inspection
+python download.py --modality nvs --quality-tier showcase
 
-# Download first 5 training scenes for 3D reconstruction
-python download.py --modality 3d --scene-list train_scenes_v1.txt --count 5
+# Download evaluation-quality scenes for novel view synthesis
+python download.py --modality nvs --quality-tier evaluation_ready
 
-# Download the entire dataset with full modalities
+# Download first 5 training-ready scenes for 3D reconstruction
+python download.py --modality 3d --quality-tier training_ready --count 5
+
+# Explicitly download every scene listed in the public manifest
 python download.py --modality full --all
 ```
 For more downloading options and examples, see the [Usage Examples](#usage-examples) section below, or run `python download.py --help`.
@@ -34,6 +37,8 @@ The Wanderland dataset is available on HuggingFace at [`ai4ce/wanderland`](https
 - **Camera Parameters**: Intrinsics, extrinsics, and transformations in `transforms.json`
 - **Splits**: Train/validation splits for novel view synthesis (per-scene image splits)
 - **Navigation**: Isaac Sim compatible scene files (USDZ) and episode configurations
+
+The downloader reads the public manifest `wanderland_public_manifest.csv` by default. This manifest is the source of truth for currently released scenes and includes `quality_tier` values such as `showcase`, `evaluation_ready`, and `training_ready`. The downloader uses the manifest `data_path` field to locate scene files in the Hugging Face dataset, so the remote folder layout can evolve without changing user commands.
 
 ## Download Modalities
 
@@ -176,49 +181,56 @@ wanderland_data/
 
 **Note**: This is different from scene-level splits (train_scenes_v1.txt / eval_scenes_v1.txt) which divide scenes for 3D reconstruction benchmarking.
 
-## Scene Splits
+## Scene Selection
 
-The dataset provides two types of splits:
+The recommended way to select scenes is through the public manifest:
 
-### Scene-Level Splits (3D Reconstruction)
-Used to divide scenes into training and evaluation sets for 3D reconstruction benchmarks.
+```bash
+python download.py --modality nvs --quality-tier showcase
+python download.py --modality nvs --quality-tier evaluation_ready
+python download.py --modality 3d --quality-tier training_ready
+```
 
-- **`train_scenes_v1.txt`**: 235 training scenes
-- **`eval_scenes_v1.txt`**: 200 evaluation scenes
+The repository also includes two legacy scene-level split files used by the paper:
 
-These splits correspond to the exact division used in the Wanderland paper.
+- **`train_scenes_v1.txt`**: 235 training scenes in the paper split
+- **`eval_scenes_v1.txt`**: 200 evaluation scenes in the paper split
+
+Current public downloads are validated against the manifest. If a legacy split contains scenes that are not in the current public manifest, the downloader skips them and reports a warning.
 
 ### Image-Level Splits (Novel View Synthesis)
 Each scene contains `nvs_split/train.txt` and `nvs_split/val.txt` that divide the images within that scene for novel view synthesis tasks.
 
 ## Usage Examples
 
-### Example 1: Download Evaluation Scenes for NVS Benchmark
+### Example 1: Download Showcase Scenes for Quick Inspection
 ```bash
-# Download all 200 evaluation scenes with NVS data
-python download.py --modality nvs --scene-list eval_scenes_v1.txt
+python download.py --modality nvs --quality-tier showcase
 ```
 
-### Example 2: Download Training Scenes for 3D Reconstruction
+### Example 2: Download Evaluation-Quality Scenes for NVS
 ```bash
-# Download first 10 training scenes with 3D reconstruction data
-python download.py --modality 3d --scene-list train_scenes_v1.txt --count 10
+python download.py --modality nvs --quality-tier evaluation_ready
 ```
 
-### Example 3: Download Navigation Data for Isaac Sim
+### Example 3: Download Training-Ready Scenes for 3D Reconstruction
 ```bash
-# Download navigation files for all scenes
-python download.py --modality navigation --all --output ../nav_data
+python download.py --modality 3d --quality-tier training_ready --count 10
 ```
 
-### Example 4: Download Specific Scenes
+### Example 4: Explicitly Download All Manifest Scenes
+```bash
+python download.py --modality full --all --output ../wanderland_full
+```
+
+### Example 5: Download Specific Scenes
 ```bash
 # Download specific scenes by name
 python download.py --modality full \
   --scenes 1-A_d1uPKpnDksrjY3UE23dUTC0odvnHu 1-j7j0xj8vB0uYpWlByv0PvyRCawz6WXH
 ```
 
-### Example 5: Download Custom Scene List
+### Example 6: Download Custom Scene List
 ```bash
 # Create custom scene list
 cat > my_scenes.txt << EOF

@@ -25,8 +25,8 @@ cd ../download
 uv sync
 source .venv/bin/activate
 
-# Download a small subset first
-python download.py --modality nvs --scene-list eval_scenes_v1.txt --count 1 --output ../wanderland_data
+# Download one showcase scene first
+python download.py --modality nvs --quality-tier showcase --count 1 --output ../wanderland_data
 ```
 
 ### 2) Train 3DGS on the downloaded scene

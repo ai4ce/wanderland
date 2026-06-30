@@ -1,35 +1,101 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 import argparse
+import csv
 import tarfile
 import shutil
+from collections import Counter
 from pathlib import Path
-from typing import List
 
-from huggingface_hub import HfApi, hf_hub_download, snapshot_download
+from huggingface_hub import hf_hub_download, snapshot_download
 
 # Constants
 DATASET_REPO = "ai4ce/wanderland"
+PUBLIC_MANIFEST_FILE = "wanderland_public_manifest.csv"
 
 
-def list_available_scenes():
-    """Query HuggingFace API for available scenes."""
-    print(f"Fetching available scenes from {DATASET_REPO}...")
-    api = HfApi()
-    files = api.list_repo_files(DATASET_REPO, repo_type="dataset")
+def clean_manifest_value(row, field):
+    """Return a manifest field as a stripped string, treating missing values as empty."""
+    return (row.get(field) or "").strip()
 
-    scenes = set()
-    for file in files:
-        # Look for files under data/{scene_name}/
-        if file.startswith("data/"):
-            parts = file.split("/")
-            if len(parts) >= 2:
-                scene_name = parts[1]
-                scenes.add(scene_name)
 
-    return sorted(list(scenes))
+def default_scene_data_path(scene_id):
+    """Return the legacy dataset path for a scene."""
+    return f"data/{scene_id}"
+
+
+def cleanup_empty_parents(path, stop_dir):
+    """Remove empty parent directories up to, but not including, stop_dir."""
+    path = Path(path)
+    stop_dir = Path(stop_dir).resolve()
+    while path.exists() and path.resolve() != stop_dir:
+        try:
+            path.rmdir()
+        except OSError:
+            break
+        path = path.parent
+
+
+def load_public_manifest():
+    """Load the public manifest that defines the currently released scenes."""
+    print(f"Fetching public manifest from {DATASET_REPO}/{PUBLIC_MANIFEST_FILE}...")
+    try:
+        manifest_path = hf_hub_download(
+            repo_id=DATASET_REPO,
+            repo_type="dataset",
+            filename=PUBLIC_MANIFEST_FILE,
+        )
+    except Exception as e:
+        print(f"Error: Failed to download public manifest: {e}")
+        sys.exit(1)
+
+    required_columns = {"scene_id", "quality_tier"}
+    rows = []
+    with open(manifest_path, newline="") as f:
+        reader = csv.DictReader(f)
+        missing_columns = required_columns - set(reader.fieldnames or [])
+        if missing_columns:
+            print(
+                "Error: Public manifest is missing required columns: "
+                + ", ".join(sorted(missing_columns))
+            )
+            sys.exit(1)
+
+        for row in reader:
+            scene_id = clean_manifest_value(row, "scene_id")
+            if not scene_id:
+                continue
+            row["scene_id"] = scene_id
+            row["quality_tier"] = clean_manifest_value(row, "quality_tier")
+            row["data_path"] = (
+                clean_manifest_value(row, "data_path").strip("/")
+                or default_scene_data_path(scene_id)
+            )
+            rows.append(row)
+
+    if not rows:
+        print("Error: Public manifest contains no scenes")
+        sys.exit(1)
+
+    return rows
+
+
+def describe_public_manifest(rows):
+    """Print a concise summary of the loaded public manifest."""
+    versions = sorted({clean_manifest_value(row, "manifest_version") for row in rows if clean_manifest_value(row, "manifest_version")})
+    updated_at = sorted({clean_manifest_value(row, "manifest_updated_at") for row in rows if clean_manifest_value(row, "manifest_updated_at")})
+    release_versions = Counter(clean_manifest_value(row, "release_version") or "unspecified" for row in rows)
+    tiers = Counter(clean_manifest_value(row, "quality_tier") or "unspecified" for row in rows)
+
+    print(f"Found {len(rows)} released scenes in public manifest")
+    if versions:
+        print(f"Manifest version: {', '.join(versions)}")
+    if updated_at:
+        print(f"Manifest updated at: {', '.join(updated_at)}")
+    if release_versions:
+        print("Release versions: " + ", ".join(f"{version}={count}" for version, count in sorted(release_versions.items())))
+    print("Quality tiers: " + ", ".join(f"{tier}={count}" for tier, count in sorted(tiers.items())))
 
 
 def download_file_from_hf(repo_id, filename, local_dir):
@@ -47,11 +113,11 @@ def download_file_from_hf(repo_id, filename, local_dir):
         return None
 
 
-def download_directory_from_hf(repo_id, scene_name, directory_name, output_dir):
+def download_directory_from_hf(repo_id, scene_path, directory_name, output_dir):
     """Download entire directory from HuggingFace using snapshot_download."""
     try:
         # Download only files matching the directory pattern
-        pattern = f"data/{scene_name}/{directory_name}/**"
+        pattern = f"{scene_path}/{directory_name}/**"
 
         snapshot_download(
             repo_id=repo_id,
@@ -81,17 +147,19 @@ def untar_file(tar_path, extract_dir, remove_after=True):
         return False
 
 
-def download_scene(scene_name, modality, output_dir):
+def download_scene(scene_name, scene_path, modality, output_dir):
     """
     Download a scene based on the specified modality.
     
     Args:
         scene_name: Name of the scene to download
+        scene_path: Path to the scene directory in the HuggingFace dataset
         modality: Download modality ('3d', 'nvs', 'navigation', or 'full')
         output_dir: Root output directory
     """
     print(f"\n{'='*60}")
     print(f"Downloading scene: {scene_name} (modality: {modality})")
+    print(f"Source path: {scene_path}")
     print(f"{'='*60}")
 
     scene_output_dir = output_dir / scene_name
@@ -100,7 +168,7 @@ def download_scene(scene_name, modality, output_dir):
     if modality == "full":
         # Download entire scene directory
         print("Downloading full scene...")
-        pattern = f"data/{scene_name}/**"
+        pattern = f"{scene_path}/**"
 
         try:
             snapshot_download(
@@ -110,8 +178,8 @@ def download_scene(scene_name, modality, output_dir):
                 local_dir=output_dir,
             )
 
-            # Move files from data/{scene_name}/ to {scene_name}/
-            downloaded_scene_dir = output_dir / "data" / scene_name
+            # Move files from the manifest data_path to {scene_name}/
+            downloaded_scene_dir = output_dir / scene_path
 
             if downloaded_scene_dir.exists():
                 # Move all contents
@@ -126,7 +194,7 @@ def download_scene(scene_name, modality, output_dir):
 
                 # Clean up empty data directory
                 downloaded_scene_dir.rmdir()
-                (output_dir / "data").rmdir()
+                cleanup_empty_parents(downloaded_scene_dir.parent, output_dir)
 
             # Extract all tar.gz files
             for tar_file in scene_output_dir.glob("*.tar.gz"):
@@ -141,8 +209,8 @@ def download_scene(scene_name, modality, output_dir):
     elif modality == "navigation":
         # Download only navigation-related files for Isaac Sim
         files_to_download = [
-            f"data/{scene_name}/scene.usdz",
-            f"data/{scene_name}/episodes.json",
+            f"{scene_path}/scene.usdz",
+            f"{scene_path}/episodes.json",
         ]
 
         # Download files
@@ -155,7 +223,7 @@ def download_scene(scene_name, modality, output_dir):
             )
 
             if downloaded:
-                # Move from data/{scene_name}/ to {scene_name}/
+                # Move from the manifest data_path to {scene_name}/
                 src = output_dir / file_path
                 dst = scene_output_dir / Path(file_path).name
 
@@ -164,12 +232,10 @@ def download_scene(scene_name, modality, output_dir):
                     shutil.move(str(src), str(dst))
 
         # Clean up data directory structure
-        data_dir = output_dir / "data" / scene_name
+        data_dir = output_dir / scene_path
         if data_dir.exists() and not any(data_dir.iterdir()):
             data_dir.rmdir()
-        data_parent = output_dir / "data"
-        if data_parent.exists() and not any(data_parent.iterdir()):
-            data_parent.rmdir()
+        cleanup_empty_parents(data_dir.parent, output_dir)
 
         print(f"Navigation files downloaded to {scene_output_dir}")
 
@@ -180,16 +246,16 @@ def download_scene(scene_name, modality, output_dir):
 
         # Common files for both modes
         files_to_download.extend([
-            f"data/{scene_name}/images.tar.gz",
-            f"data/{scene_name}/images_mask.tar.gz",
+            f"{scene_path}/images.tar.gz",
+            f"{scene_path}/images_mask.tar.gz",
         ])
         dirs_to_download.append("sparse")
 
         if modality == "nvs":
             # Additional files for NVS mode
             files_to_download.extend([
-                f"data/{scene_name}/raw_pcd.ply",
-                f"data/{scene_name}/3dgs.ply",
+                f"{scene_path}/raw_pcd.ply",
+                f"{scene_path}/3dgs.ply",
             ])
             dirs_to_download.extend(["nvs_split"])
 
@@ -203,7 +269,7 @@ def download_scene(scene_name, modality, output_dir):
             )
 
             if downloaded:
-                # Move from data/{scene_name}/ to {scene_name}/
+                # Move from the manifest data_path to {scene_name}/
                 src = output_dir / file_path
                 dst = scene_output_dir / Path(file_path).name
 
@@ -216,13 +282,13 @@ def download_scene(scene_name, modality, output_dir):
             print(f"Downloading {dir_name}/ directory...")
             download_directory_from_hf(
                 DATASET_REPO,
-                scene_name,
+                scene_path,
                 dir_name,
                 output_dir
             )
 
-            # Move from data/{scene_name}/{dir_name}/ to {scene_name}/{dir_name}/
-            src_dir = output_dir / "data" / scene_name / dir_name
+            # Move from the manifest data_path/{dir_name}/ to {scene_name}/{dir_name}/
+            src_dir = output_dir / scene_path / dir_name
             dst_dir = scene_output_dir / dir_name
 
             if src_dir.exists():
@@ -231,12 +297,10 @@ def download_scene(scene_name, modality, output_dir):
                 shutil.move(str(src_dir), str(dst_dir))
 
         # Clean up data directory structure
-        data_dir = output_dir / "data" / scene_name
+        data_dir = output_dir / scene_path
         if data_dir.exists() and not any(data_dir.iterdir()):
             data_dir.rmdir()
-        data_parent = output_dir / "data"
-        if data_parent.exists() and not any(data_parent.iterdir()):
-            data_parent.rmdir()
+        cleanup_empty_parents(data_dir.parent, output_dir)
 
         # Extract tar.gz files
         for tar_file in scene_output_dir.glob("*.tar.gz"):
@@ -260,20 +324,20 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Download first 5 scenes for 3D reconstruction
-  python download.py --modality 3d --count 5
+  # Recommended: download showcase scenes for quick inspection
+  python download.py --modality nvs --quality-tier showcase
+
+  # Download evaluation-quality scenes for novel view synthesis
+  python download.py --modality nvs --quality-tier evaluation_ready
+
+  # Download first 5 training-ready scenes for 3D reconstruction
+  python download.py --modality 3d --quality-tier training_ready --count 5
 
   # Download specific scenes for novel view synthesis
   python download.py --modality nvs --scenes scene_001 scene_002
 
-  # Download all scenes (full data)
+  # Explicitly download every scene listed in the public manifest
   python download.py --modality full --all
-
-  # Download scenes from a list file for navigation tasks
-  python download.py --modality navigation --scene-list train_scenes_v1.txt
-
-  # Download evaluation scenes for benchmarking
-  python download.py --modality nvs --scene-list eval_scenes_v1.txt --output ../wanderland_data
         """
     )
 
@@ -296,13 +360,8 @@ Examples:
         help="Output directory for downloaded data (default: ../wanderland_data)"
     )
 
-    # Scene selection (mutually exclusive)
-    scene_group = parser.add_mutually_exclusive_group(required=True)
-    scene_group.add_argument(
-        "--count",
-        type=int,
-        help="Download first N scenes"
-    )
+    # Scene selection (mutually exclusive, with --count as an optional limiter)
+    scene_group = parser.add_mutually_exclusive_group()
     scene_group.add_argument(
         "--scenes",
         nargs="+",
@@ -318,8 +377,38 @@ Examples:
         type=str,
         help="Path to text file containing scene names (one per line, # for comments)"
     )
+    scene_group.add_argument(
+        "--quality-tier",
+        type=str,
+        help="Download scenes from a public manifest quality tier, e.g. showcase, "
+             "evaluation_ready, or training_ready"
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        help="Limit the selected scenes to the first N entries"
+    )
 
     args = parser.parse_args()
+
+    if args.quality_tier is not None:
+        args.quality_tier = args.quality_tier.strip()
+        if not args.quality_tier:
+            parser.error("--quality-tier must be a non-empty string")
+
+    if args.count is not None and args.count <= 0:
+        parser.error("--count must be a positive integer")
+
+    if not any([
+        args.scenes,
+        args.all,
+        args.scene_list,
+        args.quality_tier,
+        args.count is not None,
+    ]):
+        parser.error(
+            "choose a scene selector: --quality-tier, --scene-list, --scenes, --all, or --count"
+        )
 
     # Create output directory
     output_dir = Path(args.output)
@@ -331,32 +420,50 @@ Examples:
     print(f"Output: {output_dir.absolute()}")
     print("="*60)
 
-    # Get list of available scenes
-    available_scenes = list_available_scenes()
-    print(f"Found {len(available_scenes)} available scenes")
+    # Get list of currently released scenes from the public manifest.
+    manifest_rows = load_public_manifest()
+    describe_public_manifest(manifest_rows)
+    available_scenes = [row["scene_id"] for row in manifest_rows]
+    available_scene_set = set(available_scenes)
+    manifest_by_scene = {row["scene_id"]: row for row in manifest_rows}
 
     # Determine which scenes to download
     scenes_to_download = []
 
     if args.all:
         scenes_to_download = available_scenes
-        print(f"Downloading all {len(scenes_to_download)} scenes")
+        print(f"Selected all {len(scenes_to_download)} manifest scenes")
 
-    elif args.count:
-        scenes_to_download = available_scenes[:args.count]
-        print(f"Downloading first {len(scenes_to_download)} scenes")
+    elif args.quality_tier:
+        scenes_to_download = [
+            row["scene_id"]
+            for row in manifest_rows
+            if row.get("quality_tier", "") == args.quality_tier
+        ]
+
+        if not scenes_to_download:
+            available_tiers = sorted({
+                clean_manifest_value(row, "quality_tier")
+                for row in manifest_rows
+                if clean_manifest_value(row, "quality_tier")
+            })
+            print(f"Error: No scenes found for quality tier '{args.quality_tier}'")
+            print(f"Available quality tiers: {', '.join(available_tiers)}")
+            sys.exit(1)
+
+        print(f"Selected {len(scenes_to_download)} scenes from quality tier '{args.quality_tier}'")
 
     elif args.scenes:
         # Validate scene names
         invalid_scenes = []
         for scene in args.scenes:
-            if scene in available_scenes:
+            if scene in available_scene_set:
                 scenes_to_download.append(scene)
             else:
                 invalid_scenes.append(scene)
 
         if invalid_scenes:
-            print(f"Warning: Invalid scene names: {invalid_scenes}")
+            print(f"Warning: Scene names not found in public manifest: {invalid_scenes}")
 
         if not scenes_to_download:
             print("Error: No valid scenes specified")
@@ -375,19 +482,34 @@ Examples:
         # Validate scene names
         invalid_scenes = []
         for scene in requested_scenes:
-            if scene in available_scenes:
+            if scene in available_scene_set:
                 scenes_to_download.append(scene)
             else:
                 invalid_scenes.append(scene)
 
         if invalid_scenes:
-            print(f"Warning: Invalid scene names in file: {invalid_scenes}")
+            print(f"Warning: Scene names not found in public manifest: {invalid_scenes}")
 
         if not scenes_to_download:
             print("Error: No valid scenes in list file")
             sys.exit(1)
 
         print(f"Downloading {len(scenes_to_download)} scenes from list file")
+
+    elif args.count:
+        scenes_to_download = available_scenes[:args.count]
+        print(f"Selected first {len(scenes_to_download)} manifest scenes")
+
+    count_only_selection = args.count is not None and not any([
+        args.scenes,
+        args.all,
+        args.scene_list,
+        args.quality_tier,
+    ])
+    if args.count is not None and not count_only_selection:
+        original_count = len(scenes_to_download)
+        scenes_to_download = scenes_to_download[:args.count]
+        print(f"Applying --count {args.count}: {len(scenes_to_download)} of {original_count} selected scenes")
 
     # Download each scene
     success_count = 0
@@ -397,7 +519,8 @@ Examples:
         print(f"\n[Scene {idx}/{len(scenes_to_download)}]")
 
         try:
-            success = download_scene(scene_name, args.modality, output_dir)
+            scene_path = manifest_by_scene[scene_name]["data_path"]
+            success = download_scene(scene_name, scene_path, args.modality, output_dir)
             if success:
                 success_count += 1
             else:
