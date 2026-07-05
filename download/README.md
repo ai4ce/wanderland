@@ -139,7 +139,7 @@ v2 showcase downloads contain a processed-asset subset such as `fisheye/`, `3dgs
 - Dense 3D point cloud of the scene
 - Format: PLY (Polygon File Format)
 - Contains: XYZ coordinates and RGB color information
-- Coordinate system: Aligned with COLMAP camera poses
+- Coordinate system: aligned with the scene camera poses. v1 scenes follow the original COLMAP-aligned release convention; v2 showcase geometry uses the newer pipeline's raw Z-up world.
 
 **`3dgs.ply`**
 - Pre-trained 3D Gaussian Splatting model
@@ -302,8 +302,9 @@ Where:
 
 ## Coordinate System
 
-- Camera poses follow COLMAP convention (camera-to-world transformation)
-- Point cloud coordinates aligned with camera coordinate system
-- v2 showcase assets use the newer pipeline's raw Z-up world; convert to Y-up with `[x, y, z] -> [x, -z, y]` (`R_x(+90°)`) when needed
+- `transforms.json` stores camera-to-world transformations.
+- Scene geometry is aligned with the camera poses in the same scene release.
+- v1 scenes follow the original COLMAP-aligned release convention.
+- v2 showcase assets use the newer pipeline's raw Z-up world; convert to Y-up with `[x, y, z] -> [x, -z, y]` (`R_x(+90°)`) when needed.
 - Right-handed coordinate system
 - Units: Meters
