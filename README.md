@@ -9,6 +9,9 @@
   <a href="https://huggingface.co/datasets/ai4ce/wanderland" target="_blank">
       <img alt="HF Dataset: Wanderland" src="https://img.shields.io/badge/%F0%9F%A4%97%20_Data-Wanderland-ffc107?color=ffc107&logoColor=white" height="25" />
   </a>
+  <a href="https://github.com/ai4ce/wanderland-lab" target="_blank">
+      <img alt="Simulation: wanderland-lab" src="https://img.shields.io/badge/Simulation-wanderland--lab-green?logo=github" height="25" />
+  </a>
 
   <div style="font-family: charter;">
       <a href="https://gaaaavin.github.io/">Xinhao Liu</a>*,
@@ -32,7 +35,7 @@
 > Downloaded data is selected through the public Hugging Face manifest. See [`download/`](download/README.md) for quality-tier downloads such as `showcase`, `evaluation_ready`, and `training_ready`.
 
 # Release TODO
-- [ ] Simulation Code Release
+- [x] [Jul 2026] [Simulation Code Release](https://github.com/ai4ce/wanderland-lab)
 - [x] [Jan 2026] 3D Reconstruction Benchmark Release
 - [x] [Jan 2026] Data Release
 
@@ -47,6 +50,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 * To benchmark 3D reconstruction methods, check [3d_recon_benchmark](3d_recon_benchmark/README.md)
 * To generate navigation episodes / videos, check [navigation](navigation/README.md)
 * To reproduce our reconstruction pipeline, check [reconstruction](reconstruction/README.md)
+* For closed-loop evaluation and training in simulation, check [wanderland-lab](https://github.com/ai4ce/wanderland-lab)
 
 Each component have its own virtual environment. Remember to `deactivate` and reactivate the venv when switching between different components.
 
