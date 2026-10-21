@@ -1,0 +1,314 @@
+{
+  "scene_id": "1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74",
+  "coordinate_system": "wanderland_colmap_y_up",
+  "world_up": [
+    0,
+    -1,
+    0
+  ],
+  "counts": {
+    "las_points": 24097177,
+    "gaussians": 649736,
+    "mesh_vertices": 59033,
+    "mesh_faces": 80324,
+    "preview_points": 2870165,
+    "fisheye_images": 7926,
+    "nvs_train": 6287,
+    "nvs_val": 1606,
+    "camera_poses": 7894
+  },
+  "bbox_m": {
+    "min": [
+      -67.7347,
+      -21.4263,
+      -108.226
+    ],
+    "max": [
+      128.66580000000002,
+      1.2622,
+      46.9102
+    ]
+  },
+  "ground_coverage_m2": 4178.5,
+  "trajectory_length_m": 335.46192705589345,
+  "voxel_size_m": 0.04583139443111597,
+  "raw": {
+    "repository": "ai4ce/wanderland",
+    "revision": "2ef8b26ff077af751bb37440b5d8fc6b27f8acbc",
+    "folder_url": "https://huggingface.co/datasets/ai4ce/wanderland/tree/main/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74",
+    "files": {
+      "3dgs.ply": {
+        "bytes": 153339173,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/3dgs.ply"
+      },
+      "core/ImgPose.txt": {
+        "bytes": 1678872,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/core/ImgPose.txt"
+      },
+      "core/autotest.log": {
+        "bytes": 810791,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/core/autotest.log"
+      },
+      "core/core_manifest.json": {
+        "bytes": 1386,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/core/core_manifest.json"
+      },
+      "core/odom.csv": {
+        "bytes": 609325,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/core/odom.csv"
+      },
+      "core/output_files.tsv": {
+        "bytes": 168,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/core/output_files.tsv"
+      },
+      "fisheye.tar.gz": {
+        "bytes": 3260749860,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/fisheye.tar.gz"
+      },
+      "info/calibration.json": {
+        "bytes": 3066,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/info/calibration.json"
+      },
+      "info/device_info.json": {
+        "bytes": 295,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/info/device_info.json"
+      },
+      "lidar/colorized.las": {
+        "bytes": 1156665501,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/lidar/colorized.las"
+      },
+      "lidar/uncolorized.las": {
+        "bytes": 1156665501,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/lidar/uncolorized.las"
+      },
+      "nvs_split/train.txt": {
+        "bytes": 185467,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/nvs_split/train.txt"
+      },
+      "nvs_split/val.txt": {
+        "bytes": 47256,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/nvs_split/val.txt"
+      },
+      "reports/build_report.json": {
+        "bytes": 385,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/build_report.json"
+      },
+      "reports/coordinate_transform_y_up.json": {
+        "bytes": 6759,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/coordinate_transform_y_up.json"
+      },
+      "reports/format_report.json": {
+        "bytes": 1415,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/format_report.json"
+      },
+      "reports/mesh_summary.json": {
+        "bytes": 2004,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/mesh_summary.json"
+      },
+      "reports/result_storage_manifest.json": {
+        "bytes": 491,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/result_storage_manifest.json"
+      },
+      "reports/split_summary.json": {
+        "bytes": 340,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/split_summary.json"
+      },
+      "reports/transforms_report.json": {
+        "bytes": 1665,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/reports/transforms_report.json"
+      },
+      "scene.ply": {
+        "bytes": 3878060,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/scene.ply"
+      },
+      "scene_manifest.json": {
+        "bytes": 793,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/scene_manifest.json"
+      },
+      "transforms.json": {
+        "bytes": 7478697,
+        "url": "https://huggingface.co/datasets/ai4ce/wanderland/resolve/2ef8b26ff077af751bb37440b5d8fc6b27f8acbc/data/v2/01_showcase/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/transforms.json"
+      }
+    }
+  },
+  "assets": {
+    "3dgs.sog": {
+      "path": "scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/3dgs.sog",
+      "bytes": 11614511
+    },
+    "pointcloud.glb": {
+      "path": "scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/pointcloud.glb",
+      "bytes": 15187752
+    },
+    "mesh.glb": {
+      "path": "scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/mesh.glb",
+      "bytes": 656124
+    }
+  },
+  "thumbnails": [
+    {
+      "path": "images/scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/cover.webp",
+      "source_frame": "fisheye/left_1780503838900865024.jpg",
+      "timestamp": 1780503838900865024,
+      "sharpness": 261.2701468420664,
+      "camera": {
+        "position": [
+          12.93943153412,
+          -1.137411588531,
+          -4.391624823509
+        ],
+        "quaternion": [
+          0.9826179242910961,
+          0.11467597715146984,
+          0.13261911626931183,
+          0.06102134975695293
+        ],
+        "fov": 58.71550708558255,
+        "aspect": 1.7777777777777777,
+        "up": [
+          0,
+          -1,
+          0
+        ]
+      },
+      "source_dimensions": [
+        1456,
+        1456
+      ],
+      "calibration_dimensions": [
+        2912,
+        2912
+      ],
+      "intrinsics_scale": 0.5
+    },
+    {
+      "path": "images/scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/1.webp",
+      "source_frame": "fisheye/right_1780504054209861888.jpg",
+      "timestamp": 1780504054209861888,
+      "sharpness": 255.83613354243053,
+      "camera": {
+        "position": [
+          27.567437216547,
+          -1.147971546736,
+          -10.896303939366
+        ],
+        "quaternion": [
+          0.9787792882504232,
+          -0.06628983129159513,
+          -0.17689742489118887,
+          0.07939813742269498
+        ],
+        "fov": 58.71550708558255,
+        "aspect": 1.7777777777777777,
+        "up": [
+          0,
+          -1,
+          0
+        ]
+      },
+      "source_dimensions": [
+        1456,
+        1456
+      ],
+      "calibration_dimensions": [
+        2912,
+        2912
+      ],
+      "intrinsics_scale": 0.5
+    },
+    {
+      "path": "images/scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/2.webp",
+      "source_frame": "fisheye/left_1780504210616183040.jpg",
+      "timestamp": 1780504210616183040,
+      "sharpness": 252.35306586821758,
+      "camera": {
+        "position": [
+          -1.584725408959,
+          0.050545778922,
+          2.496056372812
+        ],
+        "quaternion": [
+          0.9066264560241684,
+          0.028474056987141828,
+          0.42051528496380874,
+          0.019611028212626596
+        ],
+        "fov": 58.71550708558255,
+        "aspect": 1.7777777777777777,
+        "up": [
+          0,
+          -1,
+          0
+        ]
+      },
+      "source_dimensions": [
+        1456,
+        1456
+      ],
+      "calibration_dimensions": [
+        2912,
+        2912
+      ],
+      "intrinsics_scale": 0.5
+    },
+    {
+      "path": "images/scenes/1I2hMt2zvkn3PW8-A2QqQPG5kpmon4E74/3.webp",
+      "source_frame": "fisheye/right_1780503946605495808.jpg",
+      "timestamp": 1780503946605495808,
+      "sharpness": 171.89244539553326,
+      "camera": {
+        "position": [
+          49.942235945906,
+          -1.012460242668,
+          -16.501145435837
+        ],
+        "quaternion": [
+          0.28287815375826186,
+          -0.11299747143058401,
+          0.9468736764141651,
+          -0.10315891861848116
+        ],
+        "fov": 58.71550708558255,
+        "aspect": 1.7777777777777777,
+        "up": [
+          0,
+          -1,
+          0
+        ]
+      },
+      "source_dimensions": [
+        1456,
+        1456
+      ],
+      "calibration_dimensions": [
+        2912,
+        2912
+      ],
+      "intrinsics_scale": 0.5
+    }
+  ],
+  "initial_camera": {
+    "position": [
+      12.93943153412,
+      -1.137411588531,
+      -4.391624823509
+    ],
+    "quaternion": [
+      0.9826179242910961,
+      0.11467597715146984,
+      0.13261911626931183,
+      0.06102134975695293
+    ],
+    "fov": 58.71550708558255,
+    "aspect": 1.7777777777777777,
+    "up": [
+      0,
+      -1,
+      0
+    ]
+  },
+  "sog": {
+    "version": 2,
+    "spark_version": "2.4.0"
+  }
+}

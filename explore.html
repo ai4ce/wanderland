@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore Wanderland V2: aligned fisheye images, LiDAR, meshes, and 3D Gaussian Splatting across 42 scenes.">
+  <title>Explore Data · Wanderland</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="static/css/explore.css">
+  <script type="module" src="static/js/explore.js"></script>
+</head>
+<body>
+  <nav class="explorer-nav container" aria-label="Main navigation">
+    <a class="explorer-brand" href="index.html">Wanderland</a>
+    <a href="index.html">← Project page</a>
+  </nav>
+  <main class="container explorer-main">
+    <section class="explorer-banner">
+      <video autoplay muted loop playsinline aria-hidden="true" poster="static/images/scenes/1mvAC_tfER7gmheAI1a-i96Mngbo1Tfa-/cover.webp">
+        <source src="static/videos/3dgs_mosaic.webm" type="video/webm">
+      </video>
+      <div class="banner-copy">
+        <p class="eyebrow">Wanderland V2 · 42 scenes</p>
+        <h1 class="title is-1">Explore the data</h1>
+        <p>Step inside aligned fisheye images, LiDAR point clouds, meshes, and 3D Gaussian Splatting.</p>
+      </div>
+      <button id="banner-pause" class="button is-small is-rounded" type="button" aria-label="Pause banner video">Pause video</button>
+    </section>
+    <section class="gallery-section" aria-labelledby="gallery-title">
+      <div class="section-heading">
+        <h2 id="gallery-title" class="title is-4">Scene gallery</h2>
+        <p id="gallery-status" role="status">Loading scenes…</p>
+      </div>
+      <div id="scene-grid" class="scene-grid"></div>
+      <noscript>Enable JavaScript to browse the scene gallery.</noscript>
+    </section>
+  </main>
+  <footer class="explorer-footer"><a href="index.html">Wanderland</a> · Geometrically Grounded Simulation for Open-World Embodied AI</footer>
+</body>
+</html>

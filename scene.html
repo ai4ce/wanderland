@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore an aligned Wanderland scene in 3D Gaussian Splatting, point cloud, and mesh views.">
+  <title>Scene · Wanderland</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="static/css/explore.css">
+  <script type="importmap">
+    {"imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+      "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/2.4.0/spark.module.js"
+    }}
+  </script>
+  <script type="module" src="static/js/scene.js"></script>
+</head>
+<body>
+  <nav class="explorer-nav container" aria-label="Main navigation">
+    <a class="explorer-brand" href="index.html">Wanderland</a>
+    <a href="explore.html">← Scene gallery</a>
+  </nav>
+  <main class="container explorer-main">
+    <header class="scene-heading">
+      <p class="eyebrow">Wanderland V2</p>
+      <h1 id="scene-title" class="title is-2">Scene</h1>
+      <p id="scene-id" class="scene-id"></p>
+    </header>
+    <p id="page-status" role="status">Loading scene details…</p>
+    <section id="scene-content" hidden aria-label="Scene explorer">
+      <div class="viewer-shell">
+        <div id="viewer-toolbar" class="viewer-toolbar" hidden>
+          <div class="modality-tabs" role="tablist" aria-label="3D representation">
+            <button id="tab-3dgs" type="button" role="tab" aria-selected="true" aria-controls="viewer" data-modality="3dgs">3DGS</button>
+            <button id="tab-pointcloud" type="button" role="tab" aria-selected="false" aria-controls="viewer" tabindex="-1" data-modality="pointcloud">Point Cloud</button>
+            <button id="tab-mesh" type="button" role="tab" aria-selected="false" aria-controls="viewer" tabindex="-1" data-modality="mesh">Mesh</button>
+          </div>
+          <div class="viewer-actions">
+            <span id="level-readout" title="Composed correction relative to the starting horizontal view"></span>
+            <label id="point-size-label" hidden>Point size
+              <input id="point-size" type="range" min="0.002" max="0.04" step="0.001" value="0.01">
+            </label>
+            <label id="mesh-style-label" hidden>Mesh
+              <select id="mesh-style" aria-label="Mesh appearance">
+                <option value="shaded">Shaded</option>
+                <option value="colored">Colored</option>
+              </select>
+            </label>
+            <button id="reset-view" class="button is-small is-rounded" type="button">Reset view</button>
+          </div>
+        </div>
+        <div id="viewer" class="viewer-stage" role="tabpanel" aria-labelledby="tab-3dgs">
+          <img id="scene-cover" alt="Scene cover view">
+          <div id="viewer-status" class="viewer-status" role="status">
+            <p id="viewer-message">Preparing viewer…</p>
+            <progress id="viewer-progress" max="100" hidden aria-label="Loading 3D asset"></progress>
+          </div>
+        </div>
+        <p id="controls-hint" class="controls-hint" hidden>Click the view to navigate · Drag to look · Right-drag to pan · WASD / arrows to move · Q / E down / up · Scroll to dolly · I / K pitch level · J / L yaw level · U / O roll level · Level step 1.5° (hold to repeat) · Shift: move faster / level step 5°</p>
+      </div>
+      <div class="scene-details">
+        <section class="info-panel" aria-labelledby="stats-title">
+          <h2 id="stats-title" class="title is-4">Scene at a glance</h2>
+          <dl id="scene-stats" class="detail-stats"></dl>
+        </section>
+        <section class="info-panel" aria-labelledby="downloads-title">
+          <h2 id="downloads-title" class="title is-4">Get the data</h2>
+          <p>Lightweight previews are shown above. Download the full-resolution source files for research and simulation.</p>
+          <a id="raw-folder" class="button is-dark is-rounded" target="_blank" rel="noopener">Browse raw scene ↗</a>
+          <ul id="download-links" class="download-links"></ul>
+          <p id="preview-sizes" class="size-note"></p>
+        </section>
+      </div>
+    </section>
+    <noscript>Enable JavaScript to view scene details and the interactive 3D preview.</noscript>
+  </main>
+  <footer class="explorer-footer"><a href="explore.html">← All scenes</a> · <a href="index.html">Project page</a></footer>
+</body>
+</html>
